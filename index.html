@@ -1,18 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RecentApp Admin Panel</title>
+    <title>REU Panel - Login</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="config.js"></script>
+    <script src="firebase-config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', sans-serif;
             height: 100vh;
             display: flex;
             align-items: center;
@@ -23,141 +21,54 @@
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 400px;
+            width: 350px;
         }
-        .login-container h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-        }
-        .input-group input {
+        h2 { text-align: center; color: #333; margin-bottom: 30px; }
+        input {
             width: 100%;
             padding: 12px;
+            margin: 8px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
+            font-size: 14px;
         }
         button {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             color: white;
             border: none;
             border-radius: 5px;
             font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
-        }
-        button:hover {
-            transform: translateY(-2px);
-        }
-        .error-message {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-        .register-link {
-            text-align: center;
             margin-top: 20px;
-            color: #666;
         }
-        .register-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
+        button:hover { background: #5a67d8; }
+        .error { color: red; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h2>🔐 RecentApp Admin Panel</h2>
-        <form id="loginForm">
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="email" required placeholder="admin@example.com">
-            </div>
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="password" required placeholder="********">
-            </div>
-            <button type="submit">Login</button>
-            <div class="error-message" id="errorMessage"></div>
-        </form>
-        <div class="register-link">
-            Belum punya akun? <a href="#" onclick="showRegister()">Register</a>
-        </div>
+        <h2>🔐 REU Panel Login</h2>
+        <input type="email" id="email" placeholder="Email" value="jaxrat@gmail.com">
+        <input type="password" id="password" placeholder="Password" value="ejagans!">
+        <button onclick="login()">Login</button>
+        <div id="error" class="error"></div>
     </div>
 
     <script>
-        function showRegister() {
-            const email = prompt("Masukkan email untuk registrasi:");
-            if (!email) return;
-            
-            const password = prompt("Masukkan password (minimal 6 karakter):");
-            if (!password || password.length < 6) {
-                alert("Password minimal 6 karakter");
-                return;
-            }
-            
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    alert("Registrasi berhasil! Silakan login.");
-                    
-                    // Save user to database
-                    const user = userCredential.user;
-                    db.ref('users/' + user.uid).set({
-                        email: email,
-                        createdAt: new Date().toISOString(),
-                        role: 'user',
-                        balance: 0,
-                        isActive: true
-                    });
-                })
-                .catch((error) => {
-                    alert("Error: " + error.message);
-                });
-        }
-
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
+        function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('errorMessage');
             
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    currentUser = userCredential.user;
-                    
-                    // Check if owner
-                    db.ref('settings/owner_uid').once('value', (snapshot) => {
-                        ownerUid = snapshot.val();
-                        
-                        // Redirect to dashboard
-                        window.location.href = 'dashboard.html';
-                    });
+                    window.location.href = 'dashboard.html';
                 })
                 .catch((error) => {
-                    errorDiv.textContent = error.message;
+                    document.getElementById('error').innerText = error.message;
                 });
-        });
+        }
     </script>
 </body>
 </html>
