@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - RecentApp Admin</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            font-size: 24px;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .profile-section {
+            margin-bottom: 30px;
+        }
+        .profile-section h3 {
+            color: #666;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .info-label {
+            width: 150px;
+            color: #666;
+            font-weight: 500;
+        }
+        .info-value {
+            flex: 1;
+            color: #333;
+        }
+        .info-value input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .danger-zone {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            border-radius: 5px;
+        }
+        .danger-zone h3 {
+            color: #c53030;
+            margin-bottom: 15px;
+        }
+        .danger-btn {
+            background: #c53030;
+        }
+        .danger-btn:hover {
+            background: #9b2c2c;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>RecentApp Admin Panel</h1>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Profile</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>👤 Profile Settings</h2>
+        
+        <div class="profile-section">
+            <h3>Account Information</h3>
+            <div class="info-row">
+                <div class="info-label">Email:</div>
+                <div class="info-value" id="profileEmail"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">UID:</div>
+                <div class="info-value" id="profileUid"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Account Type:</div>
+                <div class="info-value" id="profileRole"></div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h3>Change Password</h3>
+            <div class="info-row">
+                <div class="info-label">Current Password:</div>
+                <div class="info-value">
+                    <input type="password" id="currentPassword" placeholder="Enter current password">
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">New Password:</div>
+                <div class="info-value">
+                    <input type="password" id="newPassword" placeholder="Enter new password (min 6 chars)">
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Confirm Password:</div>
+                <div class="info-value">
+                    <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                </div>
+            </div>
+            <button onclick="changePassword()">Update Password</button>
+        </div>
+
+        <div class="profile-section">
+            <h3>Owner Settings (Owner Only)</h3>
+            <div class="info-row">
+                <div class="info-label">Owner UID:</div>
+                <div class="info-value" id="ownerUid"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Set New Owner UID:</div>
+                <div class="info-value">
+                    <input type="text" id="newOwnerUid" placeholder="Enter new owner UID">
+                </div>
+            </div>
+            <button onclick="setOwnerUid()">Update Owner UID</button>
+        </div>
+
+        <div class="danger-zone">
+            <h3>⚠️ Danger Zone</h3>
+            <button class="danger-btn" onclick="deleteAccount()">Delete Account</button>
+        </div>
+    </div>
+
+    <script>
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = user;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('profileUid').textContent = user.uid;
+            
+            // Check if owner
+            db.ref('settings/owner_uid').once('value', (snapshot) => {
+                ownerUid = snapshot.val();
+                document.getElementById('ownerUid').textContent = ownerUid;
+                document.getElementById('profileRole').textContent = (user.uid === ownerUid) ? 'Owner' : 'User';
+                
+                // Show/hide owner settings
+                document.querySelector('.profile-section:last-of-type').style.display = 
+                    (user.uid === ownerUid) ? 'block' : 'none';
+            });
+            
+            // Load user data
+            db.ref('users/' + user.uid).once('value', (snapshot) => {
+                const userData = snapshot.val() || {};
+                // Additional user data can be displayed here
+            });
+        });
+
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (!current || !newPass || !confirm) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            if (newPass.length < 6) {
+                alert('New password must be at least 6 characters');
+                return;
+            }
+            
+            if (newPass !== confirm) {
+                alert('New passwords do not match');
+                return;
+            }
+            
+            // Reauthenticate first
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                currentUser.email, 
+                current
+            );
+            
+            currentUser.reauthenticateWithCredential(credential)
+                .then(() => {
+                    return currentUser.updatePassword(newPass);
+                })
+                .then(() => {
+                    alert('Password updated successfully!');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        }
+
+        function setOwnerUid() {
+            const newOwnerUid = document.getElementById('newOwnerUid').value;
+            if (!newOwnerUid) {
+                alert('Please enter new owner UID');
+                return;
+            }
+            
+            if (currentUser.uid !== ownerUid) {
+                alert('Only owner can change owner UID');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to change owner UID? This action is irreversible!')) {
+                db.ref('settings/owner_uid').set(newOwnerUid)
+                    .then(() => {
+                        alert('Owner UID updated successfully!');
+                        document.getElementById('ownerUid').textContent = newOwnerUid;
+                        document.getElementById('newOwnerUid').value = '';
+                    })
+                    .catch((error) => {
+                        alert('Error: ' + error.message);
+                    });
+            }
+        }
+
+        function deleteAccount() {
+            if (!confirm('Are you sure you want to delete your account? This action is irreversible!')) {
+                return;
+            }
+            
+            // Reauthenticate first
+            const password = prompt('Enter your password to confirm:');
+            if (!password) return;
+            
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                currentUser.email, 
+                password
+            );
+            
+            currentUser.reauthenticateWithCredential(credential)
+                .then(() => {
+                    // Delete user data from database
+                    return db.ref('users/' + currentUser.uid).remove();
+                })
+                .then(() => {
+                    // Delete auth user
+                    return currentUser.delete();
+                })
+                .then(() => {
+                    alert('Account deleted successfully');
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+</html>
