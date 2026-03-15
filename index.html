@@ -12,6 +12,62 @@
     <!-- Chart.js untuk visualisasi -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+    <script>
+    // Cek apakah user sudah login, redirect ke dashboard
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // Cek apakah user punya akses
+            firebase.database().ref(`users/${user.uid}`).once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        window.location.replace('dashboard.html');
+                    }
+                })
+                .catch(() => {});
+        }
+    });
+    
+    // Handle form submit
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const loginBtn = document.getElementById('loginBtn');
+        const errorDiv = document.getElementById('errorMessage');
+        
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span>⏳ Logging in...</span>';
+        errorDiv.style.display = 'none';
+        
+        try {
+            // Sign in
+            const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+            
+            // Cek akses
+            const snapshot = await firebase.database().ref(`users/${user.uid}`).once('value');
+            const ownerSnapshot = await firebase.database().ref('settings/owner_uid').once('value');
+            
+            if (snapshot.exists() || user.uid === ownerSnapshot.val()) {
+                // Login sukses, redirect
+                window.location.replace('dashboard.html');
+            } else {
+                // Ga punya akses, logout
+                await firebase.auth().signOut();
+                throw new Error('Akun tidak memiliki akses premium');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            
+            errorDiv.style.display = 'block';
+            errorDiv.textContent = error.message;
+            
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<span>🔓 Login ke Panel</span>';
+        }
+    });
+</script>
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
