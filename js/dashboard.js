@@ -3,26 +3,52 @@ let currentPage = 'dashboard';
 let victimsRef = null;
 
 // Auth state observer
+// Auth state observer dengan guard yang bener
 firebase.auth().onAuthStateChanged(async (user) => {
     if (!user) {
-        window.location.href = 'index.html';
+        // Ini penting: redirect cuma sekali, jangan render apapun
+        window.location.replace('index.html'); // PAKAI replace, BUKAN href biar ga backlog history
         return;
     }
     
-    currentUser = user;
-    
-    // Tampilkan user info
-    document.getElementById('userInfo').querySelector('.user-email').textContent = user.email;
-    
-    // Cek apakah owner
-    const ownerSnapshot = await firebase.database().ref('settings/owner_uid').once('value');
-    const isOwner = (user.uid === ownerSnapshot.val());
-    
-    // Load initial page
-    loadPage('dashboard');
-    
-    // Setup realtime listeners
-    setupRealtimeListeners(user.uid, isOwner);
+    // Cek apakah user valid
+    try {
+        // Ambil data user dari Firebase DB
+        const snapshot = await firebase.database().ref(`users/${user.uid}`).once('value');
+        const ownerSnapshot = await firebase.database().ref('settings/owner_uid').once('value');
+        
+        // Validasi akses
+        if (!snapshot.exists() && user.uid !== ownerSnapshot.val()) {
+            // User ga punya akses, force logout
+            await firebase.auth().signOut();
+            window.location.replace('index.html');
+            return;
+        }
+        
+        // Set global variable
+        currentUser = user;
+        window.currentUser = user; // biar global
+        
+        // Cek apakah owner
+        window.isOwner = (user.uid === ownerSnapshot.val());
+        
+        // Tampilkan user info
+        const userInfoEl = document.getElementById('userInfo');
+        if (userInfoEl) {
+            userInfoEl.querySelector('.user-email').textContent = user.email;
+        }
+        
+        // Load page pertama
+        loadPage('dashboard');
+        
+        // Setup listeners
+        setupRealtimeListeners(user.uid, window.isOwner);
+        
+    } catch (error) {
+        console.error('Auth check error:', error);
+        // Kalo error, redirect aja
+        window.location.replace('index.html');
+    }
 });
 
 // Setup listeners Firebase
@@ -192,9 +218,30 @@ document.querySelectorAll('.nav-item').forEach(item => {
 });
 
 // Logout
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-    await firebase.auth().signOut();
-    window.location.href = 'index.html';
+// Logout function yang bener
+document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    
+    try {
+        // Matikan semua listener Firebase dulu
+        if (window.victimsRef) {
+            window.victimsRef.off();
+        }
+        
+        // Sign out
+        await firebase.auth().signOut();
+        
+        // Clear local storage (opsional)
+        localStorage.removeItem('firebase:previousUser');
+        
+        // Redirect pake replace
+        window.location.replace('index.html');
+        
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Force redirect kalo error
+        window.location.replace('index.html');
+    }
 });
 
 // Menu toggle untuk mobile
