@@ -3,136 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - RAT Premium</title>
+    <title>Login - RAT Premium</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { width: 100%; max-width: 400px; padding: 20px; }
+        .login-card { background: white; border-radius: 10px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .logo h1 { font-size: 28px; color: #333; margin-bottom: 5px; }
+        .logo h1 span { color: #667eea; font-size: 14px; margin-left: 5px; }
+        .logo p { color: #666; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #555; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .btn-login { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 5px; color: white; font-size: 16px; cursor: pointer; transition: opacity 0.3s; }
+        .btn-login:hover { opacity: 0.9; }
+        .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+        .alert { padding: 12px; border-radius: 5px; margin-bottom: 20px; font-size: 14px; }
+        .alert-error { background: #fee; color: #c33; border: 1px solid #fcc; }
+        .footer-note { margin-top: 30px; text-align: center; color: #666; font-size: 13px; }
+        .footer-note .small { font-size: 11px; color: #999; margin-top: 5px; }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <!-- Chart.js untuk visualisasi -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-    <script>
-    // Cek apakah user sudah login, redirect ke dashboard
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            // Cek apakah user punya akses
-            firebase.database().ref(`users/${user.uid}`).once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        window.location.replace('dashboard.html');
-                    }
-                })
-                .catch(() => {});
-        }
-    });
-    
-    // Handle form submit
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const loginBtn = document.getElementById('loginBtn');
-        const errorDiv = document.getElementById('errorMessage');
-        
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = '<span>⏳ Logging in...</span>';
-        errorDiv.style.display = 'none';
-        
-        try {
-            // Sign in
-            const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-            const user = userCredential.user;
-            
-            // Cek akses
-            const snapshot = await firebase.database().ref(`users/${user.uid}`).once('value');
-            const ownerSnapshot = await firebase.database().ref('settings/owner_uid').once('value');
-            
-            if (snapshot.exists() || user.uid === ownerSnapshot.val()) {
-                // Login sukses, redirect
-                window.location.replace('dashboard.html');
-            } else {
-                // Ga punya akses, logout
-                await firebase.auth().signOut();
-                throw new Error('Akun tidak memiliki akses premium');
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            
-            errorDiv.style.display = 'block';
-            errorDiv.textContent = error.message;
-            
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = '<span>🔓 Login ke Panel</span>';
-        }
-    });
-</script>
 <body>
-    <div class="dashboard">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2>🔮 RAT<span>Premium</span></h2>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo">
+                <h1>🔮 RAT<span>Premium</span></h1>
+                <p>Monitoring System v5.0</p>
             </div>
             
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-page="dashboard">
-                    <span class="icon">📊</span>
-                    <span class="text">Dashboard</span>
-                </a>
-                <a href="#" class="nav-item" data-page="victims">
-                    <span class="icon">👥</span>
-                    <span class="text">Victims</span>
-                </a>
-                <a href="#" class="nav-item" data-page="live">
-                    <span class="icon">📍</span>
-                    <span class="text">Live Tracking</span>
-                </a>
-                <a href="#" class="nav-item" data-page="commands">
-                    <span class="icon">⚡</span>
-                    <span class="text">Commands</span>
-                </a>
-                <a href="#" class="nav-item" data-page="files">
-                    <span class="icon">📁</span>
-                    <span class="text">File Manager</span>
-                </a>
-                <a href="#" class="nav-item" data-page="keylogger">
-                    <span class="icon">⌨️</span>
-                    <span class="text">Keylogger</span>
-                </a>
-                <a href="#" class="nav-item" data-page="profile">
-                    <span class="icon">👤</span>
-                    <span class="text">Profile</span>
-                </a>
-            </nav>
+            <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
             
-            <div class="sidebar-footer">
-                <div class="user-info" id="userInfo">
-                    <span class="user-email">loading...</span>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Firebase</label>
+                    <input type="email" id="email" placeholder="contoh@email.com" required>
                 </div>
-                <button class="btn-logout" id="logoutBtn">🚪 Logout</button>
-            </div>
-        </aside>
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="content-header">
-                <button class="menu-toggle" id="menuToggle">☰</button>
-                <h1 id="pageTitle">Dashboard</h1>
-                <div class="header-actions">
-                    <span class="badge" id="victimCount">0 victims</span>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
                 </div>
-            </header>
+                
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <span>🔓 Login ke Panel</span>
+                </button>
+            </form>
             
-            <div class="content-body" id="contentBody">
-                <!-- Content akan diisi oleh JavaScript -->
-                <div class="loading">Loading dashboard...</div>
+            <div class="footer-note">
+                <p>Login menggunakan akun yang diberikan oleh @deakfta</p>
+                <p class="small">⚠️ Pastikan koneksi aman</p>
             </div>
-        </main>
+        </div>
     </div>
     
-    <script src="js/firebase-config.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+            authDomain: "jaxrat-6813c.firebaseapp.com",
+            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
+            projectId: "jaxrat-6813c",
+            storageBucket: "jaxrat-6813c.firebasestorage.app",
+            messagingSenderId: "750985295231",
+            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // CEK SESSION SEBELUM LOAD PAGE
+        (function() {
+            // Cek apakah sudah login dari sebelumnya
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                // Redirect ke dashboard langsung
+                window.location.replace('dashboard.html');
+                return;
+            }
+            
+            // Cek Firebase current user
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    // Ada user, cek akses
+                    firebase.database().ref(`users/${user.uid}`).once('value')
+                        .then((snapshot) => {
+                            if (snapshot.exists()) {
+                                sessionStorage.setItem('isLoggedIn', 'true');
+                                sessionStorage.setItem('userUid', user.uid);
+                                window.location.replace('dashboard.html');
+                            } else {
+                                // Ga punya akses, logout
+                                firebase.auth().signOut();
+                                sessionStorage.removeItem('isLoggedIn');
+                            }
+                        });
+                }
+            });
+        })();
+
+        // Handle Login Form
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            // Validation
+            if (!email || !password) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Email dan password harus diisi!';
+                return;
+            }
+            
+            // Disable button
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="loading-spinner"></span> <span>Processing...</span>';
+            errorDiv.style.display = 'none';
+            
+            try {
+                // Sign in to Firebase
+                console.log('Attempting login with:', email);
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                console.log('Login success, UID:', user.uid);
+                
+                // Cek akses ke database
+                console.log('Checking access...');
+                const snapshot = await firebase.database().ref(`users/${user.uid}`).once('value');
+                const ownerSnapshot = await firebase.database().ref('settings/owner_uid').once('value');
+                
+                if (snapshot.exists() || user.uid === ownerSnapshot.val()) {
+                    // Simpan session
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('userUid', user.uid);
+                    sessionStorage.setItem('userEmail', user.email);
+                    
+                    console.log('Access granted, redirecting...');
+                    
+                    // FORCE REDIRECT dengan timeout minimal
+                    setTimeout(() => {
+                        window.location.replace('dashboard.html');
+                    }, 100);
+                    
+                } else {
+                    // Ga punya akses
+                    console.log('Access denied');
+                    await firebase.auth().signOut();
+                    sessionStorage.removeItem('isLoggedIn');
+                    throw new Error('Akun tidak memiliki akses premium');
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                // Tampilkan error
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = error.message;
+                
+                // Enable button
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<span>🔓 Login ke Panel</span>';
+            }
+        });
+
+        // Prevent form resubmission on refresh
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
 </body>
 </html>
