@@ -1,4 +1,6 @@
-// Firebase Config Lo
+// PATH: /firebase-config.js
+
+// Firebase configuration dari project lo
 const firebaseConfig = {
   apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
   authDomain: "jaxrat-6813c.firebaseapp.com",
@@ -9,11 +11,7 @@ const firebaseConfig = {
   appId: "1:750985295231:web:0679d4b998e52256e4d64a"
 };
 
-// Initialize Firebase
+// Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.database();
-
-// Global Variables
-let currentUser = null;
-let ownerUid = null;
+const database = firebase.database();
