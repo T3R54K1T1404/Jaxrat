@@ -1,0 +1,12 @@
+/* PATH: /style.css */
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+.navbar { background-color: #333; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+.navbar a { color: white; margin-right: 15px; text-decoration: none; }
+.container { padding: 20px; max-width: 1200px; margin: auto; background-color: white; border-radius: 5px; margin-top: 20px; }
+.login-container { max-width: 300px; margin: 100px auto; padding: 20px; background-color: white; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+input { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
+button { background-color: #333; color: white; padding: 10px; border: none; cursor: pointer; width: 100%; }
+button:hover { background-color: #555; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background-color: #f2f2f2; }
