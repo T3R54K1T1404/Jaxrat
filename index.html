@@ -1,66 +1,81 @@
-<!-- Path: /panel/index.html -->
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REU Panel • Login</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <title>JAXRAT - Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2f 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-container { background: rgba(30, 30, 46, 0.95); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); width: 100%; max-width: 400px; border: 1px solid rgba(138, 92, 246, 0.2); }
+        h1 { color: #fff; text-align: center; margin-bottom: 2rem; font-weight: 500; letter-spacing: 1px; }
+        h1 span { color: #8a5cf6; font-weight: 700; }
+        .input-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #a0a0c0; font-size: 0.9rem; }
+        input { width: 100%; padding: 1rem; background: rgba(10, 10, 20, 0.6); border: 1px solid #2a2a3a; border-radius: 12px; color: #fff; font-size: 1rem; transition: all 0.3s; }
+        input:focus { outline: none; border-color: #8a5cf6; box-shadow: 0 0 0 3px rgba(138, 92, 246, 0.2); }
+        button { width: 100%; padding: 1rem; background: #8a5cf6; color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 1rem; }
+        button:hover { background: #6e3fd8; transform: translateY(-2px); box-shadow: 0 5px 20px rgba(138, 92, 246, 0.4); }
+        .error-msg { color: #ff4d4d; margin-top: 1rem; text-align: center; font-size: 0.9rem; }
+    </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="login-card">
-            <h1>🔐 REU Panel <span>v3.0</span></h1>
-            <p class="subtitle">Masuk dengan akun Firebase-mu</p>
-            
-            <form id="loginForm">
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="email" placeholder="email@example.com" required>
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-login">Login ke Panel</button>
-            </form>
-            
-            <div id="errorMessage" class="error hidden"></div>
+        <h1>JAX<span>RAT</span></h1>
+        <div class="input-group">
+            <label>Email Firebase</label>
+            <input type="email" id="email" placeholder="research_alt_test@gmail.com">
         </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+        <button onclick="login()">MASUK →</button>
+        <div class="error-msg" id="errorMsg"></div>
     </div>
 
-    <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
+        // 🔥 GANTI DENGAN KONFIGURASI FIREBASE LO
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+            authDomain: "jaxrat-6813c.firebaseapp.com",
+            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
+            projectId: "jaxrat-6813c",
+            storageBucket: "jaxrat-6813c.firebasestorage.app",
+            messagingSenderId: "750985295231",
+            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('errorMessage');
+            const errorMsg = document.getElementById('errorMsg');
             
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // Cek apakah user terdaftar di database
-                const userRef = db.ref('settings/users_db/' + user.uid);
-                const snapshot = await userRef.once('value');
-                
-                if (snapshot.exists() || user.uid === 'OWNER_UID_MU') {
-                    // Redirect ke dashboard dengan data user
-                    window.location.href = `dashboard.html?uid=${user.uid}`;
-                } else {
-                    errorDiv.textContent = 'Akun tidak terdaftar. Hubungi owner.';
-                    errorDiv.classList.remove('hidden');
-                }
-            } catch (error) {
-                errorDiv.textContent = 'Email atau password salah!';
-                errorDiv.classList.remove('hidden');
+            if (!email || !password) {
+                errorMsg.textContent = 'Email & password wajib diisi!';
+                return;
             }
-        });
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Simpen token di session
+                    userCredential.user.getIdToken().then(token => {
+                        sessionStorage.setItem('token', token);
+                        sessionStorage.setItem('uid', userCredential.user.uid);
+                        sessionStorage.setItem('email', email);
+                        sessionStorage.setItem('password', btoa(password)); // Encoded biar aman dikit
+                        window.location.href = 'dashboard.html';
+                    });
+                })
+                .catch((error) => {
+                    errorMsg.textContent = error.message;
+                });
+        }
     </script>
 </body>
 </html>
