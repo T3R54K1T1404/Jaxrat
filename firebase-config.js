@@ -1,6 +1,9 @@
-// PATH: /firebase-config.js
+// firebase-config.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Firebase configuration dari project lo
+// Konfigurasi FIREBASE PUNYA LO (Jangan sampe salah)
 const firebaseConfig = {
   apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
   authDomain: "jaxrat-6813c.firebaseapp.com",
@@ -11,7 +14,10 @@ const firebaseConfig = {
   appId: "1:750985295231:web:0679d4b998e52256e4d64a"
 };
 
-// Inisialisasi Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
+// Inisialisasi
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// Export biar bisa dipake di file HTML lain
+export { auth, database, signInWithEmailAndPassword, signOut, ref, set, get, child };
