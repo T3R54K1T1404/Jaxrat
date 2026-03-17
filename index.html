@@ -1,37 +1,34 @@
-<!-- PATH: /index.html -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>REU Panel - Login</title>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="login-container">
-        <h2>🔐 REU Panel v1.0</h2>
-        <p>Login dengan Email & Password Firebase</p>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button onclick="login()">Login</button>
-        <p id="error-message" style="color:red;"></p>
+        <h2>🔐 REU Monitoring Panel</h2>
+        <p>Login dengan Akun Firebase (Email/Password)</p>
+        <input type="email" id="email" placeholder="Email Firebase" />
+        <input type="password" id="password" placeholder="Password Firebase" />
+        <button onclick="login()">MASUK</button>
+        <p id="error-message" style="color: red;"></p>
     </div>
 
-    <script src="firebase-config.js"></script>
-    <script>
-        function login() {
+    <script type="module">
+        import { auth, signInWithEmailAndPassword } from './firebase-config.js';
+
+        window.login = function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorMsg = document.getElementById('error-message');
 
-            auth.signInWithEmailAndPassword(email, password)
+            signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     // Login sukses, redirect ke dashboard
                     window.location.href = 'dashboard.html';
                 })
                 .catch((error) => {
-                    errorMsg.innerText = 'Gagal login: ' + error.message;
+                    errorMsg.innerText = 'Gagal: ' + error.message;
                 });
         }
     </script>
