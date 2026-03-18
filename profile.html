@@ -1,49 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>REU Panel - Profile</title>
-    <link rel="stylesheet" href="style.css">
+    <title>👤 Profile</title>
+    <!-- Include firebase sama kayak di dashboard -->
 </head>
-<body>
-    <div class="navbar">
-        <h2>👤 Profile</h2>
-        <div>
-            <a href="dashboard.html">Dashboard</a> |
-            <a href="profile.html">Profile</a> |
-            <button onclick="logout()">Logout</button>
-        </div>
+<body style="background:#0a0e2a; color:white; padding:20px;">
+    <h2>👤 PROFILE USER</h2>
+    <div style="background:#151e3d; padding:20px; border-radius:5px;">
+        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+        <p><strong>UID Firebase:</strong> <span id="profileUid" style="background:#1e2a3a; padding:5px;">Mengambil...</span> <button onclick="copyUid()">📋 Salin</button></p>
+        <p><strong>Owner Mode:</strong> <span id="ownerStatus">Cek...</span></p>
     </div>
-    <div class="container">
-        <h1>Informasi Akun Firebase</h1>
-        <p><strong>Email:</strong> <span id="profile-email"></span></p>
-        <p><strong>Password:</strong> (Ga bisa ditampilkan, tapi lo inget sendiri pas buat akun)</p>
-        <p><strong>UID Firebase:</strong> <span id="profile-uid"></span></p>
-        <button onclick="copyUID()">📋 Copy UID</button>
-        <p id="copy-msg"></p>
-    </div>
-
-    <script type="module">
-        import { auth, signOut } from './firebase-config.js';
-
-        const user = auth.currentUser;
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            document.getElementById('profile-email').innerText = user.email;
-            document.getElementById('profile-uid').innerText = user.uid;
-        }
-
-        window.logout = function() {
-            signOut(auth).then(() => {
-                window.location.href = 'index.html';
-            });
-        }
-
-        window.copyUID = function() {
-            const uid = document.getElementById('profile-uid').innerText;
-            navigator.clipboard.writeText(uid).then(() => {
-                document.getElementById('copy-msg').innerText = 'UID Tercopy!';
-            });
+    <script>
+        firebase.auth().onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('profileEmail').innerText = user.email;
+                document.getElementById('profileUid').innerText = user.uid;
+                
+                // Cek apakah user adalah owner (uid = owner_uid di settings)
+                firebase.database().ref('settings/owner_uid').once('value', snap => {
+                    if(snap.val() === user.uid) {
+                        document.getElementById('ownerStatus').innerHTML = '✅ OWNER';
+                    } else {
+                        document.getElementById('ownerStatus').innerHTML = '❌ User Biasa';
+                    }
+                });
+            }
+        });
+        function copyUid() {
+            navigator.clipboard.writeText(document.getElementById('profileUid').innerText);
+            alert('UID tersalin!');
         }
     </script>
 </body>
