@@ -1,35 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>REU Panel - Login</title>
-    <link rel="stylesheet" href="style.css">
+    <title>⚡ Panel Login</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+            authDomain: "jaxrat-6813c.firebaseapp.com",
+            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
+            projectId: "jaxrat-6813c",
+            storageBucket: "jaxrat-6813c.firebasestorage.app",
+            messagingSenderId: "750985295231",
+            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <style>
+        body { background: #0a0e2a; color: #00ffaa; font-family: 'Courier New'; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background: #151e3d; padding: 40px; border-radius: 10px; border: 1px solid #00ffaa; width: 300px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; background: #1e2745; border: 1px solid #00aaff; color: white; }
+        button { width: 100%; padding: 10px; background: #00ffaa; color: black; font-weight: bold; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2>🔐 REU Monitoring Panel</h2>
-        <p>Login dengan Akun Firebase (Email/Password)</p>
-        <input type="email" id="email" placeholder="Email Firebase" />
-        <input type="password" id="password" placeholder="Password Firebase" />
+    <div class="login-box">
+        <h2>🔐 LOGIN PANEL</h2>
+        <input type="email" id="email" placeholder="Email Firebase">
+        <input type="password" id="password" placeholder="Password">
         <button onclick="login()">MASUK</button>
-        <p id="error-message" style="color: red;"></p>
+        <p id="error" style="color: red;"></p>
     </div>
-
-    <script type="module">
-        import { auth, signInWithEmailAndPassword } from './firebase-config.js';
-
-        window.login = function() {
+    <script>
+        function login() {
             const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorMsg = document.getElementById('error-message');
-
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // Login sukses, redirect ke dashboard
-                    window.location.href = 'dashboard.html';
-                })
-                .catch((error) => {
-                    errorMsg.innerText = 'Gagal: ' + error.message;
-                });
+            const pass = document.getElementById('password').value;
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+                .then(() => { window.location.href = 'dashboard.html'; })
+                .catch(err => { document.getElementById('error').innerText = err.message; });
         }
     </script>
 </body>
