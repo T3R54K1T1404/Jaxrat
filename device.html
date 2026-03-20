@@ -1,80 +1,151 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>👤 User Profile - JAXPANEL</title>
+    <title>👤 User Profile - JAXPANEL [REU]</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script>
-        // Gunakan Config yang sama dengan index.html
-        const firebaseConfig = {
-            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
-            authDomain: "jaxrat-6813c.firebaseapp.com",
-            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
-            projectId: "jaxrat-6813c",
-            storageBucket: "jaxrat-6813c.firebasestorage.app",
-            messagingSenderId: "750985295231",
-            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
-        };
-        firebase.initializeApp(firebaseConfig);
-    </script>
+
     <style>
-        body { background: #0a0e2a; color: white; font-family: 'Courier New'; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .profile-card { background: #151e3d; padding: 30px; border-radius: 10px; border: 1px solid #00ffaa; width: 450px; box-shadow: 0 0 20px rgba(0, 255, 170, 0.2); }
-        h2 { color: #00ffaa; text-align: center; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .info-group { margin-bottom: 20px; }
-        label { color: #888; font-size: 12px; display: block; margin-bottom: 5px; }
-        .value-box { background: #0a0e2a; padding: 10px; border: 1px solid #333; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .btn-copy { background: #00ffaa; color: black; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-copy:hover { background: #00cc88; }
-        .status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        body { 
+            background: #0a0e2a; 
+            color: white; 
+            font-family: 'Courier New', monospace; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .profile-card { 
+            background: #151e3d; 
+            padding: 35px; 
+            border-radius: 10px; 
+            border: 1px solid #00ffaa; 
+            width: 450px; 
+            box-shadow: 0 0 25px rgba(0, 255, 170, 0.15); 
+        }
+        h2 { 
+            color: #00ffaa; 
+            text-align: center; 
+            margin: 0 0 30px 0; 
+            letter-spacing: 2px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .info-group { margin-bottom: 25px; }
+        label { 
+            color: #888; 
+            font-size: 11px; 
+            display: block; 
+            margin-bottom: 8px; 
+            text-transform: uppercase;
+        }
+        .value-box { 
+            background: #0a0e2a; 
+            padding: 12px; 
+            border: 1px solid #1e2a3a; 
+            border-radius: 5px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 14px; 
+        }
+        #profileUid { color: #00aaff; font-weight: bold; }
+        .btn-copy { 
+            background: #00ffaa; 
+            color: #000; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 11px; 
+            font-weight: bold; 
+            transition: 0.2s;
+        }
+        .btn-copy:hover { background: #00cc88; transform: scale(1.05); }
+        .status-badge { 
+            display: inline-block; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+            font-weight: bold; 
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
         .owner { background: rgba(0, 255, 170, 0.1); color: #00ffaa; border: 1px solid #00ffaa; }
-        .user { background: rgba(255, 255, 255, 0.1); color: #ccc; border: 1px solid #555; }
-        .nav-link { display: block; text-align: center; margin-top: 20px; color: #888; text-decoration: none; font-size: 13px; }
-        .nav-link:hover { color: #00ffaa; }
+        .user { background: rgba(255, 255, 255, 0.05); color: #888; border: 1px solid #333; }
+        .nav-links { 
+            margin-top: 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 13px; 
+        }
+        .nav-links a { color: #00ffaa; text-decoration: none; }
+        .nav-links a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="profile-card">
-    <h2>👤 USER IDENTITY</h2>
+    <h2>👤 SYSTEM PROFILE</h2>
     
     <div class="info-group">
-        <label>EMAIL ADDRESS</label>
-        <div class="value-box"><span id="profileEmail">Loading...</span></div>
+        <label>Authenticated Email</label>
+        <div class="value-box"><span id="profileEmail">Menghubungkan...</span></div>
     </div>
 
     <div class="info-group">
-        <label>FIREBASE UID</label>
+        <label>Your Firebase UID</label>
         <div class="value-box">
-            <span id="profileUid" style="font-family: monospace; color: #00aaff;">Fetching...</span>
-            <button class="btn-copy" onclick="copyUid()">📋 COPY</button>
+            <span id="profileUid">Mencari Sesi...</span>
+            <button class="btn-copy" onclick="copyUid()">📋 SALIN</button>
         </div>
     </div>
 
     <div class="info-group">
-        <label>ACCOUNT PRIVILEGE</label>
-        <div id="ownerStatus" class="status-badge user">Checking...</div>
+        <label>Access Privilege</label>
+        <div id="ownerStatus" class="status-badge user">Menunggu Verifikasi...</div>
     </div>
 
-    <hr border="0" style="border-top: 1px solid #333; margin: 20px 0;">
-    
-    <a href="dashboard.html" class="nav-link"> Kembali ke Dashboard </a>
+    <div class="nav-links">
+        <a href="dashboard.html">⬅️ Dashboard</a>
+        <a href="#" onclick="logout()" style="color: #ff4d4d;">Logout 👋</a>
+    </div>
 </div>
 
 <script>
-    firebase.auth().onAuthStateChanged(user => {
+    // Konfigurasi Project JAXRAT
+    const firebaseConfig = {
+        apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+        authDomain: "jaxrat-6813c.firebaseapp.com",
+        databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
+        projectId: "jaxrat-6813c",
+        storageBucket: "jaxrat-6813c.firebasestorage.app",
+        messagingSenderId: "750985295231",
+        appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+    };
+
+    // Inisialisasi Apps (Cek agar tidak double init)
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    // Monitoring Sesi Login
+    firebase.auth().onAuthStateChanged((user) => {
         if (user) {
+            console.log("Sesi aktif UID:", user.uid);
+            
+            // Tampilkan Data Utama
             document.getElementById('profileEmail').innerText = user.email;
             document.getElementById('profileUid').innerText = user.uid;
-            
-            // Logika Cek Owner dari Database
-            // Path: settings/owner_uid
-            firebase.database().ref('settings/owner_uid').once('value', snap => {
-                const ownerUid = snap.val();
+
+            // Cek Privilege Owner di Database
+            // Sesuaikan path: settings/owner_uid
+            firebase.database().ref('settings/owner_uid').on('value', (snap) => {
                 const badge = document.getElementById('ownerStatus');
-                
-                if (ownerUid === user.uid) {
+                if (snap.val() === user.uid) {
                     badge.innerText = "✅ AUTHORIZED OWNER";
                     badge.className = "status-badge owner";
                 } else {
@@ -82,16 +153,33 @@
                     badge.className = "status-badge user";
                 }
             });
+
         } else {
+            // Jika tidak ada sesi login, lempar ke index
+            console.warn("Sesi tidak ditemukan, redirect ke login.");
             window.location.href = 'index.html';
         }
     });
 
+    // Fungsi Copy UID
     function copyUid() {
-        const uidText = document.getElementById('profileUid').innerText;
-        navigator.clipboard.writeText(uidText).then(() => {
-            alert("UID berhasil disalin ke clipboard, Tuan Gigs!");
+        const uid = document.getElementById('profileUid').innerText;
+        if(uid.includes("...")) return; // Jangan copy pas lagi loading
+        
+        navigator.clipboard.writeText(uid).then(() => {
+            alert("UID berhasil disalin, Tuan Gigs!");
+        }).catch(err => {
+            alert("Gagal menyalin: " + err);
         });
+    }
+
+    // Fungsi Logout
+    function logout() {
+        if(confirm("Keluar dari panel?")) {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
     }
 </script>
 
